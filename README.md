@@ -1,5 +1,5 @@
-# p71p
-Protocol/7 for Onepoint Melbourne
+# protocol/7
+Protocol/7
 ## Setup
 ### Android Debug Bridge
 ```
