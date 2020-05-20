@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo 'Setting environment variables:'
+echo -e '\t- P/7 instance identification'
+export NAME=''
+export CLIENT=''
+export ENV=''
+export PROJECT=''
+
+echo -e '\t- Credentials'
+export SLACK_BOT_TOKEN=''
+export SLACKTOKEN=''
+export CONNECT_STR=''
+export AZSTORACCNAME=''
+export AZSTORACCKEY=''
+export NTAPIUSER=''
+export NTAPIPASS=''
+export AZDEVOPSPAT=''
+export SUMOENDPOINT=''
+
+echo -e '\t- Parameters...'
+export DYNAMODBURL='http://localhost:8001'
+export CB1DATAFOLDER='./cb1data/'
+export DASHBOARDFILENAME='p7.html'
+export ADVDASHBOARDFILENAME='p7adv.html'
+export DASHBOARDSBASEURL='https://yourwebserver.com'
+export AZDEVOPSURL='https://dev.azure.com'
+export LOGSFOLDER='./log/'
+export LOGFILENAME='protocol7_default.log'
+export CONFIGFILE='sample_config'
+export NTSEARCHURL=''
+export NTLOGINURL=''
+
+echo -e '\t- Preferences...'
+# 0 = OFF
+# 1 = ON
+export ENABLEBSTICK=0
+export ENABLESLACK=0
+export ENABLESUMO=0
+export ENABLE1DASH=0
+
+echo 'Starting Protocol/7 instance '$NAME' for '$CLIENT' in environment '$ENV
+python3 ./protocol7.py
+
+exit 0
