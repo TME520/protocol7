@@ -1,5 +1,11 @@
-# protocol/7
-Protocol/7
+# Protocol/7
+Skynet, but friendlier. For now.
+## Presentation
+### Where does the name come from ?
+*Protocol Seven* is a central piece in the 1998 [*Serial Experiments Lain*](https://en.wikipedia.org/wiki/Serial_Experiments_Lain) Japanese anime TV series.
+### Crime shows, robots and angels
+### Good humans don't scale
+### A guardian angel for everyone
 ## Setup
 ### Android Debug Bridge
 ```
