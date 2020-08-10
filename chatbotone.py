@@ -25,7 +25,7 @@ nltk.download('wordnet')
 version='0.49-11'
 
 # instantiate Slack client
-slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
+slack_client = SlackClient(os.environ.get('SLACKTOKEN'))
 prodSNOWBase64 = os.environ.get('PRODSNOWBASE64')
 mengSNOWBase64 = os.environ.get('MENGSNOWBASE64')
 # starterbot's user ID in Slack: value is assigned after the bot starts up

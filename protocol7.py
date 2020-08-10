@@ -59,7 +59,7 @@ enableBStick = os.environ.get('ENABLEBSTICK')
 enableCozmo = '0'
 enableSlack = os.environ.get('ENABLESLACK')
 enableSumo = os.environ.get('ENABLESUMO')
-enableDashboard = os.environ.get('ENABLE1DASH')
+enableDashboard = os.environ.get('ENABLEDASH')
 
 # Import the URLs to test from config file
 configFile = os.environ.get('CONFIGFILE')
