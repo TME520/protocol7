@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-# Cozmo Office Mate - Onepoint version
+# Protocol/7
 
 import datetime
 from datetime import date, timedelta
 import time
-import cozmo
+# import cozmo
 import os, calendar
 import sys
 import random
@@ -46,7 +46,7 @@ except ImportError:
     sys.exit('Cannot import from PIL: Do `pip3 install --user Pillow` to install')
 
 
-# Import settings (enable/disable Blinkstick, Cozmo, Slack, Sumo, OneDash...)
+# Import settings (enable/disable Blinkstick, Cozmo, Slack, Sumo, dashboard...)
 # P/7 instance ID
 instanceName = os.environ.get('NAME')
 clientName = os.environ.get('CLIENT')
@@ -84,9 +84,9 @@ if enableSumo == '0':
 else:
 	print(f'[INFO] Sumologic logging is ON')
 if enableDashboard == '0':
-	print(f'[INFO] OneDash is OFF')
+	print(f'[INFO] dashboard is OFF')
 else:
-	print(f'[INFO] OneDash is ON')
+	print(f'[INFO] dashboard is ON')
 
 # Path to data folder (contains ML stuff)
 cb1DataFolder = os.environ.get('CB1DATAFOLDER')
@@ -98,10 +98,10 @@ logFileFolder = os.environ.get('LOGSFOLDER')
 if not os.path.exists(logFileFolder):
     os.makedirs(logFileFolder)
 
-# Path to the local version of OneDash (to be uploaded to Azure Storage)
-oneDashTempFolder = './onedash/'
-if not os.path.exists(oneDashTempFolder):
-    os.makedirs(oneDashTempFolder)
+# Path to the local version of dashboard (to be uploaded to Azure Storage)
+dashboardTempFolder = './dashboard/'
+if not os.path.exists(dashboardTempFolder):
+    os.makedirs(dashboardTempFolder)
 
 def checkInternetAccess():
     try:
@@ -187,7 +187,7 @@ def testNTAPI(apiURL, countryName, countryToken, clubId, dateMin, dateMax):
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             'Authorization': 'Bearer ' + countryToken,
-            'User-Agent':'P/7 Onedash version ' + version + ' (run=' + str(epoch) + ')'
+            'User-Agent':'P/7 dashboard version ' + version + ' (run=' + str(epoch) + ')'
         }
 
         data = '{"brandCode":"ff","countryCode":"' + countryName + '","ClubId":"' + str(clubId) + '","TimeFrom":"' + str(dateMin) + '","TimeTo":"' + str(dateMax) + '"}'
@@ -567,10 +567,10 @@ azure_stor_acc_name = os.getenv('AZSTORACCNAME')
 azure_stor_acc_key = os.getenv('AZSTORACCKEY')
 dashboardFilename = os.getenv('DASHBOARDFILENAME')
 advancedDashboardFilename = os.getenv('ADVDASHBOARDFILENAME')
-oneDashFile = dashboardFilename
-oneDashFile2 = advancedDashboardFilename
-oneDashUploadFilePath = os.path.join(oneDashTempFolder, oneDashFile)
-oneDashUploadFilePath2 = os.path.join(oneDashTempFolder, oneDashFile2)
+dashboardFile = dashboardFilename
+dashboardFile2 = advancedDashboardFilename
+dashboardUploadFilePath = os.path.join(dashboardTempFolder, dashboardFile)
+dashboardUploadFilePath2 = os.path.join(dashboardTempFolder, dashboardFile2)
 logFile = os.getenv('LOGFILENAME')
 fullLogPath = os.path.join(logFileFolder, logFile)
 dashboardBaseURL = os.getenv('DASHBOARDSBASEURL')
@@ -644,7 +644,7 @@ while True:
     currentDT = datetime.datetime.now()
     currentDay = currentDT.strftime("%A")
     currentMonth = currentDT.strftime("%B")
-    oneDashTStamp = currentDT.strftime("%A %d %B @ %H:%M")
+    dashboardTStamp = currentDT.strftime("%A %d %B @ %H:%M")
     ISOTStamp = currentDT.strftime("%Y-%m-%d %H:%M:%S")
     epoch = int(datetime.datetime.strptime(ISOTStamp, '%Y-%m-%d %H:%M:%S').strftime("%s"))
     ISOTStamp = ISOTStamp + ' +1100'
@@ -682,24 +682,24 @@ while True:
     slackMsgLine5 = ''
     slackMsgLine6 = ''
     failuresCntr = 0
-    oneDashText = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>OneDash - Applications monitoring</title>'
-    oneDashText = oneDashText + '<style>.flex-container {width: 80%; min-height: 100px; margin: 0 auto; font-size: 32px; display: -webkit-flex; display: flex; border: 1px solid #808080;}'
-    oneDashText = oneDashText + '.flex-container div {padding: 10px; background: #dbdfe5; -webkit-flex: 1; -ms-flex: 1; flex: 1;}'
-    oneDashText = oneDashText + '.flex-container div.up{background: #06d519;}'
-    oneDashText = oneDashText + '.flex-container div.down{background: #d50c06;}'
-    oneDashText = oneDashText + '.flex-container div.incident{background: #d59606;}'
-    oneDashText = oneDashText + '.flex-container div.deployment{background: #0f8ce6;}'
-    oneDashText = oneDashText + '.flex-container div.grey{background: #c0c0c0;}'
-    oneDashText = oneDashText + '</style></head><body><center><h1>Refreshed: ' + oneDashTStamp + '</h1></center>'
-    oneDashText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>OneDash - Advanced applications monitoring</title>'
-    oneDashText2 = oneDashText2 + '<style>* { box-sizing: border-box; } .columns { float: left; width: 20%; padding: 8px; } body { background-color: #2F2E30; }'
-    oneDashText2 = oneDashText2 + '.application_up { border-top: 20px solid #73D87D; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    oneDashText2 = oneDashText2 + '.application_down { border-top: 20px solid #FF4747; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    oneDashText2 = oneDashText2 + '.application_incident { border-top: 20px solid #FF904F; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    oneDashText2 = oneDashText2 + '.application_deployment { border-top: 20px solid #47A7FF; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    oneDashText2 = oneDashText2 + '.application_grey { border-top: 20px solid #C0C0C0; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    oneDashText2 = oneDashText2 + '.app_name { font-size: 40px; font-weight: bold; } .customer_name { font-size: 30px; } p { margin: 20px; } @media only screen and (max-width: 600px) { .columns { width: 100%; }}'
-    oneDashText2 = oneDashText2 + '</style></head><body>'
+    dashboardText = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>dashboard - Applications monitoring</title>'
+    dashboardText = dashboardText + '<style>.flex-container {width: 80%; min-height: 100px; margin: 0 auto; font-size: 32px; display: -webkit-flex; display: flex; border: 1px solid #808080;}'
+    dashboardText = dashboardText + '.flex-container div {padding: 10px; background: #dbdfe5; -webkit-flex: 1; -ms-flex: 1; flex: 1;}'
+    dashboardText = dashboardText + '.flex-container div.up{background: #06d519;}'
+    dashboardText = dashboardText + '.flex-container div.down{background: #d50c06;}'
+    dashboardText = dashboardText + '.flex-container div.incident{background: #d59606;}'
+    dashboardText = dashboardText + '.flex-container div.deployment{background: #0f8ce6;}'
+    dashboardText = dashboardText + '.flex-container div.grey{background: #c0c0c0;}'
+    dashboardText = dashboardText + '</style></head><body><center><h1>Refreshed: ' + dashboardTStamp + '</h1></center>'
+    dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>dashboard - Advanced applications monitoring</title>'
+    dashboardText2 = dashboardText2 + '<style>* { box-sizing: border-box; } .columns { float: left; width: 20%; padding: 8px; } body { background-color: #2F2E30; }'
+    dashboardText2 = dashboardText2 + '.application_up { border-top: 20px solid #73D87D; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_down { border-top: 20px solid #FF4747; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_incident { border-top: 20px solid #FF904F; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_deployment { border-top: 20px solid #47A7FF; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_grey { border-top: 20px solid #C0C0C0; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.app_name { font-size: 40px; font-weight: bold; } .customer_name { font-size: 30px; } p { margin: 20px; } @media only screen and (max-width: 600px) { .columns { width: 100%; }}'
+    dashboardText2 = dashboardText2 + '</style></head><body>'
     currentFailtage = 0
     currentHeader = 'application_up'
     currentStatus = 'Healthy'
@@ -726,10 +726,10 @@ while True:
             urlList[currentItem]['payload'] = payload
             if urlList[currentItem]['latest_deployment'] == 'None':
                 currentHeader = 'application_up'
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
             else:
                 currentHeader = 'application_deployment'
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="deployment">UP</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="deployment">UP</div></div></div>'
             currentStatus = 'Healthy'
             currentColor = 'green'
             urlList[currentItem]['orange_since'] = '-'
@@ -752,13 +752,13 @@ while True:
                 currentHeader = 'application_grey'
                 currentStatus = '<font color="orange"><b>Internet cnx failed during test</b></font>'
                 currentColor = 'grey'
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
             elif (failuresCntr >= 2) and (failuresCntr <= 5):
                 print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                 orangeAlert = 1
                 currentHeader = 'application_incident'
                 if urlList[currentItem]['orange_since'] == '-':
-                    urlList[currentItem]['orange_since'] = oneDashTStamp
+                    urlList[currentItem]['orange_since'] = dashboardTStamp
                 currentStatus = f'Since {urlList[currentItem]["orange_since"]}'
                 currentColor = 'orange'
                 print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
@@ -769,7 +769,7 @@ while True:
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['orange_sent'] = 1
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
                 robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
             elif failuresCntr >= 6:
                 print('[RED] Failures count of 6+ triggered a red alert')
@@ -778,7 +778,7 @@ while True:
                 if urlList[currentItem]['orange_since'] != '-':
                     urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
                 elif urlList[currentItem]['red_since'] == '-':
-                    urlList[currentItem]['red_since'] = oneDashTStamp
+                    urlList[currentItem]['red_since'] = dashboardTStamp
                 currentStatus = f'Since {urlList[currentItem]["red_since"]}'
                 currentColor = 'red'
                 print(f'- {urlList[currentItem]["appname"]} is DOWN')
@@ -789,18 +789,18 @@ while True:
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['red_sent'] = 1
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
                 robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
         if payload == 'HTTPERROR':
             pinkCounter += 1
             urlList[currentItem]['payload'] = 'HTTPERROR'
             print('[ERROR] HTTPERROR (pink light) for ' + str(urlList[currentItem]['url']))
-            oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">HTTPERROR</div></div></div>'
+            dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">HTTPERROR</div></div></div>'
         elif payload == 'URLERROR':
             whiteCounter += 1
             urlList[currentItem]['payload'] = 'URLERROR'
             print('[ERROR] URLERROR (white light) for ' + str(urlList[currentItem]['url']))
-            oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">URLERROR</div></div></div>'
+            dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">URLERROR</div></div></div>'
         elif payload == 'INETERROR':
             urlList[currentItem]['payload'] = 'INETERROR'
             print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
@@ -810,7 +810,7 @@ while True:
         print(f'- Failtage: {currentFailtage}%')
         currentRespTime = (urlList[currentItem]["rt_history"][0] + urlList[currentItem]["rt_history"][1] + urlList[currentItem]["rt_history"][2] + urlList[currentItem]["rt_history"][3] + urlList[currentItem]["rt_history"][4] + urlList[currentItem]["rt_history"][5]) / 6
         currentRespTime = round(currentRespTime,1)
-        oneDashText2 = oneDashText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(urlList[currentItem]['appname']) + '</b><br/><font class="customer_name">' + urlList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: ' + urlList[currentItem]["latest_deployment"] + '</p></div></div>'
+        dashboardText2 = dashboardText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(urlList[currentItem]['appname']) + '</b><br/><font class="customer_name">' + urlList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: ' + urlList[currentItem]["latest_deployment"] + '</p></div></div>'
         print(f'- Resp. time: {currentRespTime} seconds\n')
         newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
@@ -818,7 +818,7 @@ while True:
 
     # NT API endpoints
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now check NT API.')
-    oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>Nashtech API</b>'
+    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>Nashtech API</b>'
     for currentItem in ntAPICountriesList:
         print('\nTesting ' + ntAPICountriesList[currentItem]['longName'])
         currentHTTPResponse, currentHTTPStatusCode, currentResponseTime, currentToken = generateNTAPIToken(ntAPICountriesList[currentItem]['authURL'], ntAPICountriesList[currentItem]['shortName'])
@@ -835,7 +835,7 @@ while True:
                 orangeAlert = 1
                 currentHeader = 'application_incident'
                 if ntAPICountriesList[currentItem]['orange_since'] == '-':
-                    ntAPICountriesList[currentItem]['orange_since'] = oneDashTStamp
+                    ntAPICountriesList[currentItem]['orange_since'] = dashboardTStamp
                 currentStatus = f'Since {ntAPICountriesList[currentItem]["orange_since"]}'
                 print(f'- {ntAPICountriesList[currentItem]["longName"]} is UNKNOWN')
                 if ntAPICountriesList[currentItem]['orange_sent'] == 0:
@@ -845,7 +845,7 @@ while True:
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['orange_sent'] = 1
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + oneDashTStamp + ').</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
                 robotText = robotText + f'Token  generation for {ntAPICountriesList[currentItem]["longName"]} failed.'
             elif failuresCntr >= 6:
                 print('[RED] Failures count of 6+ triggered a red alert')
@@ -854,7 +854,7 @@ while True:
                 if ntAPICountriesList[currentItem]['orange_since'] != '-':
                     ntAPICountriesList[currentItem]['red_since'] = ntAPICountriesList[currentItem]['orange_since']
                 elif ntAPICountriesList[currentItem]['red_since'] == '-':
-                    ntAPICountriesList[currentItem]['red_since'] = oneDashTStamp
+                    ntAPICountriesList[currentItem]['red_since'] = dashboardTStamp
                 currentStatus = f'Since {ntAPICountriesList[currentItem]["red_since"]}'
                 print(f'- {ntAPICountriesList[currentItem]["longName"]} is DOWN')
                 if ntAPICountriesList[currentItem]['red_sent'] == 0:
@@ -864,7 +864,7 @@ while True:
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['red_sent'] = 1
-                oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + oneDashTStamp + ').</div></div></div>'
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
                 robotText = robotText + f'Token  generation for {ntAPICountriesList[currentItem]["longName"]} failed again.'
         else:
             currentHTTPResponse, currentHTTPStatusCode, currentResponseTime = testNTAPI(ntAPICountriesList[currentItem]['callURL'], ntAPICountriesList[currentItem]['shortName'], currentToken, 42, epoch, epoch)
@@ -881,7 +881,7 @@ while True:
                     orangeAlert = 1
                     currentHeader = 'application_incident'
                     if ntAPICountriesList[currentItem]['orange_since'] == '-':
-                        ntAPICountriesList[currentItem]['orange_since'] = oneDashTStamp
+                        ntAPICountriesList[currentItem]['orange_since'] = dashboardTStamp
                     currentStatus = f'Since {ntAPICountriesList[currentItem]["orange_since"]}'
                     print(f'- {ntAPICountriesList[currentItem]["longName"]} is UNKNOWN')
                     if ntAPICountriesList[currentItem]['orange_sent'] == 0:
@@ -891,7 +891,7 @@ while True:
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['orange_sent'] = 1
-                    oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
                     robotText = robotText + f'{ntAPICountriesList[currentItem]["longName"]} is DOWN.'
                 elif failuresCntr >= 6:
                     print('[RED] Failures count of 6+ triggered a red alert')
@@ -900,7 +900,7 @@ while True:
                     if ntAPICountriesList[currentItem]['orange_since'] != '-':
                         ntAPICountriesList[currentItem]['red_since'] = ntAPICountriesList[currentItem]['orange_since']
                     elif ntAPICountriesList[currentItem]['red_since'] == '-':
-                        ntAPICountriesList[currentItem]['red_since'] = oneDashTStamp
+                        ntAPICountriesList[currentItem]['red_since'] = dashboardTStamp
                     currentStatus = f'Since {ntAPICountriesList[currentItem]["red_since"]}'
                     print(f'- {ntAPICountriesList[currentItem]["longName"]} is DOWN')
                     if ntAPICountriesList[currentItem]['red_sent'] == 0:
@@ -910,14 +910,14 @@ while True:
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['red_sent'] = 1
-                    oneDashText = oneDashText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
                     robotText = robotText + f'{ntAPICountriesList[currentItem]["longName"]} is still DOWN.'
             else:
                 ntAPICountriesList[currentItem]['failure_history'][cycleCntr] = 0
                 print(f'- Test history over the last 6 cycles: {ntAPICountriesList[currentItem]["failure_history"]}')
                 failuresCntr = ntAPICountriesList[currentItem]["failure_history"].count(1)
                 print(f'- Number of failures: {failuresCntr}')
-                oneDashText = oneDashText + '<div class="foo"><div class="up">' + ntAPICountriesList[currentItem]['longName'] + ' UP</div></div>'
+                dashboardText = dashboardText + '<div class="foo"><div class="up">' + ntAPICountriesList[currentItem]['longName'] + ' UP</div></div>'
                 currentHeader = 'application_up'
                 currentStatus = 'Healthy'
                 ntAPICountriesList[currentItem]['orange_since'] = '-'
@@ -931,26 +931,26 @@ while True:
         print(f'- Failtage: {currentFailtage}%')
         currentRespTime = (ntAPICountriesList[currentItem]["rt_history"][0] + ntAPICountriesList[currentItem]["rt_history"][1] + ntAPICountriesList[currentItem]["rt_history"][2] + ntAPICountriesList[currentItem]["rt_history"][3] + ntAPICountriesList[currentItem]["rt_history"][4] + ntAPICountriesList[currentItem]["rt_history"][5]) / 6
         currentRespTime = round(currentRespTime,1)
-        oneDashText2 = oneDashText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(ntAPICountriesList[currentItem]['longName']) + '</b><br/><font class="customer_name">' + ntAPICountriesList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: None</p></div></div>'
+        dashboardText2 = dashboardText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(ntAPICountriesList[currentItem]['longName']) + '</b><br/><font class="customer_name">' + ntAPICountriesList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: None</p></div></div>'
         print(f'- Resp. time: {currentRespTime} seconds\n')
         newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} version={version}' + f' type=\"dashboard\" name=\"{ntAPICountriesList[currentItem]["longName"]}\" customer=\"{ntAPICountriesList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"N/A\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
 
-    oneDashText = oneDashText + '</div></div>'
-    oneDashText = oneDashText + '</body></html>'
-    oneDashText2 = oneDashText2 + '</body></html>'
+    dashboardText = dashboardText + '</div></div>'
+    dashboardText = dashboardText + '</body></html>'
+    dashboardText2 = dashboardText2 + '</body></html>'
     # robot.say_text('Now that I am done retrieving data, I will analyze it.').wait_for_completed()
     # time.sleep(shortWait)
 
-    # Refresh OneDash
+    # Refresh dashboard
     if enableDashboard == '1':
-        writeDataToFile(oneDashUploadFilePath,oneDashText,'OneDash temporary file updated successfully','OneDash temporary file refresh FAILED', 'overwrite')
-        print(f'Updating {oneDashFile} on {azure_stor_acc_name}...')
+        writeDataToFile(dashboardUploadFilePath,dashboardText,'dashboard temporary file updated successfully','dashboard temporary file refresh FAILED', 'overwrite')
+        print(f'Updating {dashboardFile} on {azure_stor_acc_name}...')
         try:
             block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
             if block_blob_service.exists(container_name):
-                block_blob_service.create_blob_from_path(container_name=container_name, blob_name=oneDashFile, file_path=oneDashUploadFilePath, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
+                block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile, file_path=dashboardUploadFilePath, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
             print('...done.')
             print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
         except Exception as e:
@@ -958,13 +958,13 @@ while True:
             traceback.print_exc()
             pass
 
-        # Refresh OneDash2
-        writeDataToFile(oneDashUploadFilePath2,oneDashText2,'OneDash2 temporary file updated successfully','OneDash2 temporary file refresh FAILED', 'overwrite')
-        print(f'Updating {oneDashFile2} on {azure_stor_acc_name}...')
+        # Refresh dashboard2
+        writeDataToFile(dashboardUploadFilePath2,dashboardText2,'dashboard2 temporary file updated successfully','dashboard2 temporary file refresh FAILED', 'overwrite')
+        print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
         try:
             block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
             if block_blob_service.exists(container_name):
-                block_blob_service.create_blob_from_path(container_name=container_name, blob_name=oneDashFile2, file_path=oneDashUploadFilePath2, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
+                block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile2, file_path=dashboardUploadFilePath2, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
             print('...done.')
             print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
         except Exception as e:
