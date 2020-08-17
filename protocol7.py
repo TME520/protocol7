@@ -16,7 +16,7 @@ import traceback
 import boto3
 import colorama
 from colorama import Fore, Style
-from azure.storage.blob import BlockBlobService, ContentSettings, ContainerPermissions
+# from azure.storage.blob import BlockBlobService, ContentSettings, ContainerPermissions
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
 from azure.devops.connection import Connection
@@ -28,11 +28,13 @@ try:
     import slack
 except ImportError:
     print('Cannot import SlackClient. Run: pip3 install slackclient')
+    pass
 
 try:
     from blinkstick import blinkstick
 except ImportError:
     print('Cannot import blinkstick. Run: pip3 install blinkstick')
+    pass
 
 try:
     import notify2
@@ -43,7 +45,8 @@ except ImportError:
 try:
     from PIL import Image, ImageDraw, ImageFont
 except ImportError:
-    sys.exit('Cannot import from PIL: Do `pip3 install --user Pillow` to install')
+    print('Cannot import from PIL: Do `pip3 install --user Pillow` to install')
+    pass
 
 
 # Import settings (enable/disable Blinkstick, Cozmo, Slack, Sumo, dashboard...)
@@ -516,8 +519,8 @@ def update_bstick_nano(bgcolor, fgcolor, mode, enableBStick):
         bstickStatus = 'disabled'
     return bstickStatus
 
-def cozmo_program(robot: cozmo.robot.Robot):
-    print('Cozmo program')
+# def cozmo_program(robot: cozmo.robot.Robot):
+#     print('Cozmo program')
 
 # Variables declaration
 version = '0.42'
