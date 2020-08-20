@@ -28,6 +28,7 @@ export LOGFILENAME='SED019'
 export CONFIGFILE='SED020'
 export NTSEARCHURL='SED021'
 export NTLOGINURL='SED022'
+export S3BUCKETNAME='SED029'
 
 echo -e '\t- Preferences...'
 # 0 = OFF
@@ -36,6 +37,8 @@ export ENABLEBSTICK=SED023
 export ENABLESLACK=SED024
 export ENABLESUMO=SED025
 export ENABLEDASH=SED026
+export AZDASHENABLED=SED027
+export AWSDASHENABLED=SED028
 
 echo 'Starting Protocol/7 instance '$NAME' for '$CLIENT' in environment '$ENV
 python3 ./protocol7.py

@@ -13,7 +13,9 @@ import urllib.request
 import urllib.error
 import json
 import traceback
+import logging
 import boto3
+from botocore.exceptions import ClientError
 import colorama
 from colorama import Fore, Style
 # from azure.storage.blob import BlockBlobService, ContentSettings, ContainerPermissions
@@ -105,6 +107,28 @@ if not os.path.exists(logFileFolder):
 dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
+
+def uploadFileToS3(file_name, bucket, object_name=None):
+    """Upload a file to an S3 bucket
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
+
+    # If S3 object_name was not specified, use file_name
+    if object_name is None:
+        object_name = file_name
+
+    # Upload the file
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.upload_file(file_name, bucket, object_name)
+    except ClientError as e:
+        logging.error(e)
+        return False
+    return True
 
 def checkInternetAccess():
     try:
@@ -577,6 +601,9 @@ dashboardUploadFilePath2 = os.path.join(dashboardTempFolder, dashboardFile2)
 logFile = os.getenv('LOGFILENAME')
 fullLogPath = os.path.join(logFileFolder, logFile)
 dashboardBaseURL = os.getenv('DASHBOARDSBASEURL')
+azureDashboard = os.getenv('AZDASHENABLED')
+amazonDashboard = os.getenv('AWSDASHENABLED')
+s3BucketName = os.getenv('S3BUCKETNAME')
 
 # Reset head and lift position
 # robot.set_head_angle(cozmo.robot.MIN_HEAD_ANGLE).wait_for_completed()
@@ -719,8 +746,8 @@ while True:
     # Refreshing deployments-related data
     urlList = lookForDeployments(environment, projectName, urlList, deploymentsTStamp)
 
-    # Onepoint apps
-    print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query API and GAMIFICATION in order to see if everything is alright.')
+    # Apps
+    print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
         print('Calling ' + urlList[currentItem]['url'])
         payload, urlList[currentItem]['rt_history'][cycleCntr] = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
@@ -949,17 +976,28 @@ while True:
     # Refresh dashboard
     if enableDashboard == '1':
         writeDataToFile(dashboardUploadFilePath,dashboardText,'dashboard temporary file updated successfully','dashboard temporary file refresh FAILED', 'overwrite')
-        print(f'Updating {dashboardFile} on {azure_stor_acc_name}...')
-        try:
-            block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
-            if block_blob_service.exists(container_name):
-                block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile, file_path=dashboardUploadFilePath, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
-            print('...done.')
-            print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
-        except Exception as e:
-            print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
-            traceback.print_exc()
-            pass
+        if azureDashboard == '1':
+            print(f'Updating {dashboardFile} on {azure_stor_acc_name}...')
+            try:
+                block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
+                if block_blob_service.exists(container_name):
+                    block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile, file_path=dashboardUploadFilePath, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
+                print('...done.')
+                print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
+            except Exception as e:
+                print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
+                traceback.print_exc()
+                pass
+        else:
+            print(f'Updating {dashboardFile} on S3 bucket...')
+            try:
+                uploadFileToS3(f'{dashboardUploadFilePath}/{dashboardFile}', s3BucketName, None)
+                print('...done.')
+                print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
+            except Exception as e:
+                print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
+                traceback.print_exc()
+                pass
 
         # Refresh dashboard2
         writeDataToFile(dashboardUploadFilePath2,dashboardText2,'dashboard2 temporary file updated successfully','dashboard2 temporary file refresh FAILED', 'overwrite')
