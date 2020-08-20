@@ -1001,17 +1001,28 @@ while True:
 
         # Refresh dashboard2
         writeDataToFile(dashboardUploadFilePath2,dashboardText2,'dashboard2 temporary file updated successfully','dashboard2 temporary file refresh FAILED', 'overwrite')
-        print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
-        try:
-            block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
-            if block_blob_service.exists(container_name):
-                block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile2, file_path=dashboardUploadFilePath2, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
-            print('...done.')
-            print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
-        except Exception as e:
-            print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
-            traceback.print_exc()
-            pass
+        if azureDashboard == '1':
+            print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
+            try:
+                block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
+                if block_blob_service.exists(container_name):
+                    block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile2, file_path=dashboardUploadFilePath2, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
+                print('...done.')
+                print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
+            except Exception as e:
+                print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
+                traceback.print_exc()
+                pass
+        else:
+            print(f'Updating {dashboardFile} on S3 bucket...')
+            try:
+                uploadFileToS3(f'{dashboardUploadFilePath}/{advancedDashboardFilename}', s3BucketName, None)
+                print('...done.')
+                print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
+            except Exception as e:
+                print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
+                traceback.print_exc()
+                pass
 
     # Slack message in #cozmo-office-mate
     # Every minute
