@@ -991,7 +991,7 @@ while True:
         else:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
-                uploadFileToS3(f'{dashboardUploadFilePath}/{dashboardFile}', s3BucketName, None)
+                uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, None)
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
             except Exception as e:
@@ -1016,7 +1016,7 @@ while True:
         else:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
-                uploadFileToS3(f'{dashboardUploadFilePath}/{advancedDashboardFilename}', s3BucketName, None)
+                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, None)
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
