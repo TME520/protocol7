@@ -25,4 +25,4 @@ def uploadFileToS3(file_name, bucket, object_name=None):
         return False
     return True
 
-uploadFileToS3('/home/tme520/Documents/GIT/protocol7/experiments/error.html', 'morbier.schneiderzupper.de', 'michon.html')
+uploadFileToS3('/home/tme520/Documents/GIT/protocol7/experiments/error.html', 'jeanmarie.schneiderzupper.de', 'michon.html')

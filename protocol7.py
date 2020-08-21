@@ -991,9 +991,10 @@ while True:
         else:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
+                writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}', 'Log updated', 'Failed to update log', 'append')
                 uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, None)
                 print('...done.')
-                print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
+                print(f'You can check the dashboard here: http://{dashboardBaseURL}/{dashboardFilename}')
             except Exception as e:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
@@ -1008,7 +1009,7 @@ while True:
                 if block_blob_service.exists(container_name):
                     block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile2, file_path=dashboardUploadFilePath2, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
                 print('...done.')
-                print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
+                print(f'You can check the dashboard here: http://{dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
@@ -1016,6 +1017,7 @@ while True:
         else:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
+                writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}', 'Log updated', 'Failed to update log', 'append')
                 uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, None)
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
