@@ -992,7 +992,7 @@ while True:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}\n', 'Log updated', 'Failed to update log', 'append')
-                uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, None)
+                uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, 'p7.html')
                 print('...done.')
                 print(f'You can check the dashboard here: http://{dashboardBaseURL}/{dashboardFilename}')
             except Exception as e:
@@ -1018,7 +1018,7 @@ while True:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
-                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, None)
+                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
