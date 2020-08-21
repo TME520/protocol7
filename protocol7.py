@@ -795,7 +795,7 @@ while True:
                 if urlList[currentItem]['orange_sent'] == 0:
                     slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
                     slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
-                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['orange_sent'] = 1
@@ -815,7 +815,7 @@ while True:
                 if urlList[currentItem]['red_sent'] == 0:
                     slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
                     slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
-                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['red_sent'] = 1
@@ -871,7 +871,7 @@ while True:
                 if ntAPICountriesList[currentItem]['orange_sent'] == 0:
                     slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
                     slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['orange_sent'] = 1
@@ -890,7 +890,7 @@ while True:
                 if ntAPICountriesList[currentItem]['red_sent'] == 0:
                     slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
                     slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['red_sent'] = 1
@@ -917,7 +917,7 @@ while True:
                     if ntAPICountriesList[currentItem]['orange_sent'] == 0:
                         slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                        slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['orange_sent'] = 1
@@ -936,7 +936,7 @@ while True:
                     if ntAPICountriesList[currentItem]['red_sent'] == 0:
                         slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                        slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['red_sent'] = 1
@@ -994,7 +994,7 @@ while True:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}\n', 'Log updated', 'Failed to update log', 'append')
                 uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, 'p7.html')
                 print('...done.')
-                print(f'You can check the dashboard here: http://{dashboardBaseURL}/{dashboardFilename}')
+                print(f'You can check the dashboard here: http://{s3BucketName}/{dashboardFilename}')
             except Exception as e:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
@@ -1020,7 +1020,7 @@ while True:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
                 uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
                 print('...done.')
-                print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
+                print(f'You can check the dashboard here: {s3BucketName}/{advancedDashboardFilename}')
             except Exception as e:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
