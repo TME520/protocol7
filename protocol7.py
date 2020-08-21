@@ -124,7 +124,7 @@ def uploadFileToS3(file_name, bucket, object_name=None):
     # Upload the file
     s3_client = boto3.client('s3')
     try:
-        response = s3_client.upload_file(file_name, bucket, object_name)
+        response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
     except ClientError as e:
         logging.error(e)
         return False
@@ -992,7 +992,7 @@ while True:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}\n', 'Log updated', 'Failed to update log', 'append')
-                uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, 'p7.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
+                uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, 'p7.html')
                 print('...done.')
                 print(f'You can check the dashboard here: http://{dashboardBaseURL}/{dashboardFilename}')
             except Exception as e:
@@ -1018,7 +1018,7 @@ while True:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
-                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html', ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
+                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
