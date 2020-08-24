@@ -71,6 +71,7 @@ $ which adb
 $ apt install openjdk-14-jre
 ```
 3. Configure AWS access (required even for local DynamoDB)
+
 `$ aws configure`
 ```
 [default]
