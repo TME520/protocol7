@@ -64,22 +64,23 @@ $ which adb
 `$ pip3 install cozmo exchangelib slackclient blinkstick sklearn pandas nltk joblib argparse boto3 colorama notify2 azure-storage-blob azure json requests_toolbelt requests azure-devops msrest`
 
 ### DynamoDB
-Download and install [AWS DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html).
 
+1. Download and install [AWS DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html).
+2. Install OpenJDK
 ```
 $ apt install openjdk-14-jre
-$ aws configure
 ```
-
+3. Configure AWS access (required even for local DynamoDB)
+`$ aws configure`
 ```
 [default]
 aws_access_key_id = AAAABBBBCCCCDDDD
 aws_secret_access_key = EEEEFFFFGGGGHHHH
 region = ap-southeast-2
 ```
-
+4. Check your config
 ```
-aws configure list
+$ aws configure list
 ```
 
 ### Blinkstick
