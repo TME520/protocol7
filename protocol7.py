@@ -315,7 +315,7 @@ def dynamodbReadFromTable(databaseURL, tableName):
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
         configItems = []
-        if tableName == 'cfg_nrvio_track':
+        if tableName == 'email_tracking':
             tableToRead = dynamodb.Table(tableName)
             x = tableToRead.scan()
             for i in x['Items']:
@@ -332,7 +332,7 @@ def dynamodbReadFromTable(databaseURL, tableName):
 def dynamodbProvisionTable(databaseURL, tableName):
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
-        if tableName == 'cfg_nrvio_track':
+        if tableName == 'email_tracking':
             tableToProvision = dynamodb.Table(tableName)
             tableToProvision.put_item(
             Item=json.loads('{"label":"Fullest disk"}')
@@ -354,7 +354,7 @@ def dynamodbProvisionTable(databaseURL, tableName):
 def dynamodbCreateTable(databaseURL, tableName):
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
-        if tableName == 'cfg_nrvio_track':
+        if tableName == 'email_tracking':
             table = dynamodb.create_table(
                 TableName=tableName,
                 KeySchema=[
@@ -377,7 +377,7 @@ def dynamodbCreateTable(databaseURL, tableName):
             table.meta.client.get_waiter('table_exists').wait(TableName=tableName)
             print(table.item_count)
             response = 'Table created'
-        elif tableName == 'p7_interapp_msg':
+        elif tableName == 'p7dev_bstick':
             table = dynamodb.create_table(
                 TableName=tableName,
                 KeySchema=[
@@ -419,11 +419,9 @@ def dynamodbTableCheck(databaseURL, tableName):
     try:
         dynamodb = boto3.client('dynamodb', endpoint_url=databaseURL)
         response = dynamodb.describe_table(TableName=tableName)
-    # except dynamodb.exceptions.ResourceNotFoundException:
     except Exception as e:
         print(f'[DEBUG] DynamoDB table {tableName} not found', e)
         response = 'Table not found'
-        # traceback.print_exc()
         pass
     return str(response)
 
@@ -613,47 +611,47 @@ s3BucketName = os.getenv('S3BUCKETNAME')
 # robot.set_head_angle(cozmo.robot.MAX_HEAD_ANGLE).wait_for_completed()
 
 # Checking DB
-# Table: cfg_nrvio_track
+# Table: email_tracking
 # Content: A list of New Relic violations to watch after
 nrVioTrackList = []
-if dynamodbTableCheck(databaseURL, 'cfg_nrvio_track') == 'Table not found':
+if dynamodbTableCheck(databaseURL, 'email_tracking') == 'Table not found':
     # Table missing - creating
-    if dynamodbCreateTable(databaseURL, 'cfg_nrvio_track') == 'Table created':
+    if dynamodbCreateTable(databaseURL, 'email_tracking') == 'Table created':
         # Table created - provisioning
-        if dynamodbProvisionTable(databaseURL, 'cfg_nrvio_track') == 'Provisioning successful':
-            nrVioTrackList = dynamodbReadFromTable(databaseURL, 'cfg_nrvio_track')
+        if dynamodbProvisionTable(databaseURL, 'email_tracking') == 'Provisioning successful':
+            nrVioTrackList = dynamodbReadFromTable(databaseURL, 'email_tracking')
         else:
-            print('Provisioning of table cfg_nrvio_track failed :-(')
+            print('Provisioning of table email_tracking failed :-(')
     else:
-        print('Creation of table cfg_nrvio_track failed :-(')
+        print('Creation of table email_tracking failed :-(')
 else:
     print('')
-    nrVioTrackList = dynamodbReadFromTable(databaseURL, 'cfg_nrvio_track')
+    nrVioTrackList = dynamodbReadFromTable(databaseURL, 'email_tracking')
 
-if dynamodbDeleteTable(databaseURL, 'cfg_nrvio_track'):
+if dynamodbDeleteTable(databaseURL, 'email_tracking'):
     print('')
 else:
-    print('Table cfg_nrvio_track deletion failed :-(')
+    print('Table email_tracking deletion failed :-(')
 
-# Table: p7_interapp_msg
+# Table: p7dev_bstick
 # Content: Messages exchanged between P7 components / apps
-if dynamodbTableCheck(databaseURL, 'p7_interapp_msg') == 'Table not found':
+if dynamodbTableCheck(databaseURL, 'p7dev_bstick') == 'Table not found':
     # Table missing - creating
-    if dynamodbCreateTable(databaseURL, 'p7_interapp_msg') == 'Table created':
+    if dynamodbCreateTable(databaseURL, 'p7dev_bstick') == 'Table created':
         # Table created - provisioning
-        if dynamodbProvisionTable(databaseURL, 'p7_interapp_msg') == 'Provisioning successful':
-            p7MsgList = dynamodbReadFromTable(databaseURL, 'p7_interapp_msg')
+        if dynamodbProvisionTable(databaseURL, 'p7dev_bstick') == 'Provisioning successful':
+            p7MsgList = dynamodbReadFromTable(databaseURL, 'p7dev_bstick')
         else:
-            print('Provisioning of table p7_interapp_msg failed :-(')
+            print('Provisioning of table p7dev_bstick failed :-(')
     else:
-        print('Creation of table p7_interapp_msg failed :-(')
+        print('Creation of table p7dev_bstick failed :-(')
 else:
-    p7MsgList = dynamodbReadFromTable(databaseURL, 'p7_interapp_msg')
+    p7MsgList = dynamodbReadFromTable(databaseURL, 'p7dev_bstick')
 
-if dynamodbDeleteTable(databaseURL, 'p7_interapp_msg'):
+if dynamodbDeleteTable(databaseURL, 'p7dev_bstick'):
     print('')
 else:
-    print('Table p7_interapp_msg deletion failed :-(')
+    print('Table p7dev_bstick deletion failed :-(')
 
 
 ############################
