@@ -286,6 +286,7 @@ def writeDataToFile(targetFile, dataToWrite, successMsg, failureMsg, mode):
         pass
 
 def dynamodbDeleteTable(databaseURL, tableName):
+    print('dynamodbDeleteTable')
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
         tableToDelete = dynamodb.Table(tableName)
@@ -299,6 +300,7 @@ def dynamodbDeleteTable(databaseURL, tableName):
     return response
 
 def dynamodbListTableItems(databaseURL, tableName):
+    print('dynamodbListTableItems')
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
         tableToList = dynamodb.Table(tableName)
@@ -312,37 +314,40 @@ def dynamodbListTableItems(databaseURL, tableName):
     return response
 
 def dynamodbReadFromTable(databaseURL, tableName):
+    print(f'dynamodbReadFromTable - databaseURL: {databaseURL} - tableName: {tableName}')
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
-        configItems = []
+        tableToRead = dynamodb.Table(tableName)
+        retrievedItems = []
         if tableName == 'email_tracking':
-            tableToRead = dynamodb.Table(tableName)
             x = tableToRead.scan()
             for i in x['Items']:
-                # print(i['label'])
-                configItems.append(i['label'])
-        response = 'Configuration data successfully loaded.'
+                print(i['label'])
+                retrievedItems.append(i['label'])
+        elif tableName == 'p7dev_bstick':
+            x = tableToRead.scan()
+            print(x)
+            for i in x['Items']:
+                print(i['expiry'])
+                retrievedItems.append(i['expiry'])
+        response = 'Data successfully loaded.'
     except Exception as e:
         print('[ERROR] Failed to load configuration data from table ' + tableName + '.\n', e)
-        response = 'Failed to load data'
+        response = 'Failed to load data.'
         traceback.print_exc()
         pass
-    return configItems
+    return retrievedItems
 
-def dynamodbProvisionTable(databaseURL, tableName):
+def dynamodbProvisionTable(databaseURL, tableName, dataToInsert):
+    print('dynamodbProvisionTable')
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
+        tableToProvision = dynamodb.Table(tableName)
         if tableName == 'email_tracking':
-            tableToProvision = dynamodb.Table(tableName)
-            tableToProvision.put_item(
-            Item=json.loads('{"label":"Fullest disk"}')
-            )
-            tableToProvision.put_item(
-            Item=json.loads('{"label":"High Disk Usage"}')
-            )
-            tableToProvision.put_item(
-            Item=json.loads('{"label":"Layer 7 Disk Usage"}')
-            )
+            tableToProvision.put_item(Item=json.loads(dataToInsert))
+        elif tableName == 'p7dev_bstick':
+            print('Provision p7dev_bstick')
+            tableToProvision.put_item(Item=json.loads(dataToInsert))
         response = 'Provisioning successful'
     except Exception as e:
         print('[ERROR] Failed to create database table ' + tableName + '.\n', e)
@@ -352,6 +357,7 @@ def dynamodbProvisionTable(databaseURL, tableName):
     return response
 
 def dynamodbCreateTable(databaseURL, tableName):
+    print('dynamodbCreateTable')
     try:
         dynamodb = boto3.resource('dynamodb', endpoint_url=databaseURL)
         if tableName == 'email_tracking':
@@ -382,21 +388,13 @@ def dynamodbCreateTable(databaseURL, tableName):
                 TableName=tableName,
                 KeySchema=[
                     {
-                        'AttributeName': 'action_name',
+                        'AttributeName': 'msgId',
                         'KeyType': 'HASH'
-                    },
-                    {
-                        'AttributeName': 'action_status',
-                        'KeyType': 'RANGE'  #Sort key
-                    },
+                    }
                 ],
                 AttributeDefinitions=[
                     {
-                        'AttributeName': 'action_name',
-                        'AttributeType': 'S'
-                    },
-                    {
-                        'AttributeName': 'action_status',
+                        'AttributeName': 'msgId',
                         'AttributeType': 'S'
                     }
                 ],
@@ -416,6 +414,7 @@ def dynamodbCreateTable(databaseURL, tableName):
     return response
 
 def dynamodbTableCheck(databaseURL, tableName):
+    print('dynamodbTableCheck')
     try:
         dynamodb = boto3.client('dynamodb', endpoint_url=databaseURL)
         response = dynamodb.describe_table(TableName=tableName)
@@ -509,8 +508,8 @@ def update_bstick_color(bstickColor, enableBStick):
         bstickStatus = 'disabled'
     return bstickStatus
 
-def update_bstick_nano(bgcolor, fgcolor, mode, enableBStick):
-    # This function drives the BlinkStick Nano (two LEDs, one on each side)
+def update_local_bstick_nano(bgcolor, fgcolor, mode, enableBStick):
+    # This function drives the local BlinkStick Nano (two LEDs, one on each side)
     if enableBStick == '1':
         if mode == 'normal':
             try:
@@ -545,7 +544,7 @@ def update_bstick_nano(bgcolor, fgcolor, mode, enableBStick):
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.42'
+version = '0.45'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -613,12 +612,13 @@ s3BucketName = os.getenv('S3BUCKETNAME')
 # Checking DB
 # Table: email_tracking
 # Content: A list of New Relic violations to watch after
+dataToInsert = '{"label":"Fullest disk"}'
 nrVioTrackList = []
 if dynamodbTableCheck(databaseURL, 'email_tracking') == 'Table not found':
     # Table missing - creating
     if dynamodbCreateTable(databaseURL, 'email_tracking') == 'Table created':
         # Table created - provisioning
-        if dynamodbProvisionTable(databaseURL, 'email_tracking') == 'Provisioning successful':
+        if dynamodbProvisionTable(databaseURL, 'email_tracking', dataToInsert) == 'Provisioning successful':
             nrVioTrackList = dynamodbReadFromTable(databaseURL, 'email_tracking')
         else:
             print('Provisioning of table email_tracking failed :-(')
@@ -633,25 +633,20 @@ if dynamodbDeleteTable(databaseURL, 'email_tracking'):
 else:
     print('Table email_tracking deletion failed :-(')
 
+# Checking DB
 # Table: p7dev_bstick
-# Content: Messages exchanged between P7 components / apps
-if dynamodbTableCheck(databaseURL, 'p7dev_bstick') == 'Table not found':
+# Content: Commands destined to be used by the BlinkStick to set it's color (RGB) and mode (on, off, blinking)
+tableName = 'p7dev_bstick'
+if dynamodbTableCheck(databaseURL, tableName) == 'Table not found':
     # Table missing - creating
-    if dynamodbCreateTable(databaseURL, 'p7dev_bstick') == 'Table created':
-        # Table created - provisioning
-        if dynamodbProvisionTable(databaseURL, 'p7dev_bstick') == 'Provisioning successful':
-            p7MsgList = dynamodbReadFromTable(databaseURL, 'p7dev_bstick')
-        else:
-            print('Provisioning of table p7dev_bstick failed :-(')
+    print('Table missing - creating')
+    if dynamodbCreateTable(databaseURL, tableName) == 'Table created':
+        print(f'Creation of table {tableName} succeeded.')
     else:
-        print('Creation of table p7dev_bstick failed :-(')
+        print(f'Creation of table {tableName} failed :-(')
 else:
-    p7MsgList = dynamodbReadFromTable(databaseURL, 'p7dev_bstick')
-
-if dynamodbDeleteTable(databaseURL, 'p7dev_bstick'):
     print('')
-else:
-    print('Table p7dev_bstick deletion failed :-(')
+    msgList = dynamodbReadFromTable(databaseURL, tableName)
 
 
 ############################
@@ -666,7 +661,7 @@ while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
     bottomLightColor = 'blue'
-    bstickStatus = update_bstick_nano(bottomLightColor, topLightColor, 'normal', enableBStick)
+    bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'normal', enableBStick)
     # robot.set_all_backpack_lights(cozmo.lights.blue_light)
     time.sleep(shortWait)
     currentDT = datetime.datetime.now()
@@ -1090,7 +1085,7 @@ while True:
     print('Now waiting for next cycle to begin', end='', flush=True)
 
     for currentStep in range (0,32):
-        bstickStatus = update_bstick_nano(bottomLightColor, topLightColor, 'flash', enableBStick)
+        bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'flash', enableBStick)
         # bstickStatus = bstick_control(bottomLightColor, topLightColor, currentStep, enableBStick)
         print('.', end='', flush=True)
         time.sleep(1)
