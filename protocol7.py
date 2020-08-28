@@ -552,7 +552,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
             tomorrow = date.today() + timedelta(days=1)
             cmdExpiry = tomorrow.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             cmdOrigin = instanceIdentifier
-            dataToInsert = '{"msgId":"' + ISOTStamp + '","expiry":"' + cmdExpiry + '","origin":"' + cmdOrigin + '",' + bgcolor + ',' + fgcolor + ',' + '"topMode":"' + topmode + '","bottomMode":"' + bottommode + '"}'
+            dataToInsert = '{"msgId":"' + cmdOrigin + '##BStickNano' + '","expiry":"' + cmdExpiry + '","origin":"' + cmdOrigin + '",' + bgcolor + ',' + fgcolor + ',' + '"topMode":"' + topmode + '","bottomMode":"' + bottommode + '"}'
             msgList = []
             tableName = 'p7dev_bstick'
 
@@ -561,6 +561,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
                 print('New command inserted in database')
 
             print(f'msgList: {msgList}')
+            bstickStatus = bgcolor
         except Exception as e:
             print('[ERROR] Failed to update remote Blinkstick color.\n', e)
             bstickStatus = 'unknown'
