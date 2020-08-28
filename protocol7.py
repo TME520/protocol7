@@ -1137,7 +1137,7 @@ while True:
     print(Fore.RED + '[Protocol/7] ' + Fore.BLUE + '\nEnd of cycle. Next cycle in ' + str(cycleDuration) + ' seconds.')
     print('Now waiting for next cycle to begin', end='', flush=True)
 
-    update_remote_bstick_nano(bottomRemoteLightColor, topRemoteLightColor, 'on', 'flash', enableRemoteBStick, instanceIdentifier)
+    update_remote_bstick_nano(bottomRemoteLightColor, '"tR":"0","tG":"0","tB":"255"', 'on', 'flash', enableRemoteBStick, instanceIdentifier)
     for currentStep in range (0,32):
         bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'flash', enableLocalBStick)
         # bstickStatus = bstick_control(bottomLightColor, topLightColor, currentStep, enableLocalBStick)
