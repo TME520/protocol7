@@ -57,7 +57,7 @@ instanceName = os.environ.get('NAME')
 clientName = os.environ.get('CLIENT')
 environment = os.environ.get('ENV')
 projectName = os.environ.get('PROJECT')
-instanceIdentifier = f'{NAME}##{CLIENT}##{PROJECT}##{ENV}'
+instanceIdentifier = f'{instanceName}##{clientName}##{projectName}##{environment}'
 # Preferences
 # 0 = False
 # 1 = True
