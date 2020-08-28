@@ -57,10 +57,12 @@ instanceName = os.environ.get('NAME')
 clientName = os.environ.get('CLIENT')
 environment = os.environ.get('ENV')
 projectName = os.environ.get('PROJECT')
+instanceIdentifier = f'{NAME}##{CLIENT}##{PROJECT}##{ENV}'
 # Preferences
 # 0 = False
 # 1 = True
-enableBStick = os.environ.get('ENABLEBSTICK')
+enableLocalBStick = os.environ.get('ENABLELOCALBSTICK')
+enableRemoteBStick = os.environ.get('ENABLEREMOTEBSTICK')
 enableCozmo = '0'
 enableSlack = os.environ.get('ENABLESLACK')
 enableSumo = os.environ.get('ENABLESUMO')
@@ -72,7 +74,7 @@ configData = importlib.import_module(configFile)
 urlList = configData.urlList
 ntAPICountriesList = configData.ntAPICountriesList
 
-if enableBStick == '0':
+if enableLocalBStick == '0':
 	print(f'[INFO] Blinkstick is OFF')
 else:
 	print(f'[INFO] Blinkstick is ON')
@@ -470,9 +472,9 @@ def post_message_to_slack(slackLogChannel, slackMessage, slackEmoji, enableSlack
             print('[ERROR] Failed to post message to Slack.\n', e)
             pass
 
-def bstick_control(bgcolor, fgcolor, dot, enableBStick):
+def bstick_control(bgcolor, fgcolor, dot, enableLocalBStick):
     # This function drives the BlinkStick Flex (32 LEDs)
-    if enableBStick == '1':
+    if enableLocalBStick == '1':
         try:
             # Setting background color first
             for bstick in blinkstick.find_all():
@@ -490,9 +492,9 @@ def bstick_control(bgcolor, fgcolor, dot, enableBStick):
         bstickStatus = 'disabled'
     return bstickStatus
 
-def update_bstick_color(bstickColor, enableBStick):
+def update_bstick_color(bstickColor, enableLocalBStick):
     # This function drives the BlinkStick Flex (32 LEDs)
-    if enableBStick == '1':
+    if enableLocalBStick == '1':
         try:
             for bstick in blinkstick.find_all():
                 for currentLED in range (0,32):
@@ -508,9 +510,9 @@ def update_bstick_color(bstickColor, enableBStick):
         bstickStatus = 'disabled'
     return bstickStatus
 
-def update_local_bstick_nano(bgcolor, fgcolor, mode, enableBStick):
+def update_local_bstick_nano(bgcolor, fgcolor, mode, enableLocalBStick):
     # This function drives the local BlinkStick Nano (two LEDs, one on each side)
-    if enableBStick == '1':
+    if enableLocalBStick == '1':
         if mode == 'normal':
             try:
                 for bstick in blinkstick.find_all():
@@ -532,10 +534,38 @@ def update_local_bstick_nano(bgcolor, fgcolor, mode, enableBStick):
                 time.sleep(0.1)
                 bstickStatus = bgcolor
             except Exception as e:
-                print('[ERROR] Failed to update Blinkstick color.\n', e)
+                print('[ERROR] Failed to update local Blinkstick color.\n', e)
                 bstickStatus = 'unknown'
                 traceback.print_exc()
                 pass
+    else:
+        bstickStatus = 'disabled'
+    return bstickStatus
+
+def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemoteBStick, instanceIdentifier):
+    # This function drives remote BlinkStick Nano (two LEDs, one on each side)
+    if enableRemoteBStick == '1':
+        try:
+            print('Inserting new command in database')
+            currentDT = datetime.datetime.now()
+            ISOTStamp = currentDT.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            tomorrow = date.today() + timedelta(days=1)
+            cmdExpiry = tomorrow.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            cmdOrigin = instanceIdentifier
+            dataToInsert = '{"msgId":"' + ISOTStamp + '","expiry":"' + cmdExpiry + '","origin":"' + cmdOrigin + '",' + bgcolor + ',' + fgcolor + ',' + '"topMode":"' + topmode + '","bottomMode":"' + bottommode + '"}'
+            msgList = []
+            tableName = 'p7dev_bstick'
+
+            if dynamodbProvisionTable(databaseURL, tableName, dataToInsert) == 'Provisioning successful':
+                msgList = dynamodbReadFromTable(databaseURL, tableName)
+                print('New command inserted in database')
+
+            print(f'msgList: {msgList}')
+        except Exception as e:
+            print('[ERROR] Failed to update remote Blinkstick color.\n', e)
+            bstickStatus = 'unknown'
+            traceback.print_exc()
+            pass
     else:
         bstickStatus = 'disabled'
     return bstickStatus
@@ -584,6 +614,7 @@ blueCounter = 0
 whiteCounter = 0
 pinkCounter = 0
 topLightColor = 'blue'
+topRemoteLightColor = '"tR":"0","tG":"0","tB":"255"'
 urgencyWords = ['ombudsman','court','tribunal','urgent','emergency','angry','dissatisfied','escalation','attorney','lawyer','threat', 'extreme', 'annoy', 'complain', 'insult', 'upset']
 emptyCreds = { 'foo' : 'bar' }
 container_name = '$web'
@@ -656,12 +687,17 @@ os.system('clear')
 print(Fore.RED + '################')
 print(Fore.RED + '#  Protocol/7  #')
 print(Fore.RED + '################')
+print('')
+print(Fore.RED + 'Instance ID: ' + instanceIdentifier)
+print('')
 print(Fore.GREEN + '')
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
     bottomLightColor = 'blue'
-    bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'normal', enableBStick)
+    bottomRemoteLightColor = '"bR":"0","bG":"0","bB":"255"'
+    bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'normal', enableLocalBStick)
+    update_remote_bstick_nano(bottomRemoteLightColor, topRemoteLightColor, 'on', 'on', enableRemoteBStick, instanceIdentifier)
     # robot.set_all_backpack_lights(cozmo.lights.blue_light)
     time.sleep(shortWait)
     currentDT = datetime.datetime.now()
@@ -1045,16 +1081,21 @@ while True:
     if redAlert == 1:
         print('[DEBUG] Red alert')
         bottomLightColor = 'red'
+        bottomRemoteLightColor = '"bR":"255","bG":"0","bB":"0"'
         topLightColor = 'red'
+        topRemoteLightColor = '"tR":"255","tG":"0","tB":"0"'
         # robot.set_all_backpack_lights(cozmo.lights.red_light.flash())               
     elif orangeAlert == 1:
         print('[DEBUG] Orange alert')
         bottomLightColor = 'orange'
+        bottomRemoteLightColor = '"bR":"244","bG":"147","bB":"19"'
         topLightColor = 'orange'
+        topRemoteLightColor = '"tR":"244","tG":"147","tB":"19"'
         # robot.set_center_backpack_lights(cozmo.lights.Light(cozmo.lights.Color(rgb=(244,147,19))).flash())
     else:
         print('[DEBUG] No red or orange alert')
         bottomLightColor = 'green'
+        bottomRemoteLightColor = '"bR":"0","bG":"255","bB":"0"'
         if redAlertSent == 1:
             redAlertSent = 0
         if orangeAlertSent == 1:
@@ -1062,14 +1103,19 @@ while True:
         # robot.set_center_backpack_lights(cozmo.lights.green_light.flash())
         if yellowCounter != 0:
             topLightColor = 'yellow'
+            topRemoteLightColor = '"tR":"250","tG":"250","tB":"5"'
         elif whiteCounter != 0:
             topLightColor = 'white'
+            topRemoteLightColor = '"tR":"255","tG":"255","tB":"255"'
         elif pinkCounter != 0:
             topLightColor = 'deeppink'
+            topRemoteLightColor = '"tR":"247","tG":"0","tB":"115"'
         elif blueCounter != 0:
             topLightColor = 'blue'
+            topRemoteLightColor = '"tR":"0","tG":"0","tB":"255"'
         else:
             topLightColor = 'green'
+            topRemoteLightColor = '"tR":"0","tG":"255","tB":"0"'
 
     # Time for Cozmo to talk
     if robotText != '':
@@ -1079,14 +1125,21 @@ while True:
 
     # Display debug info
     print(f'[DEBUG] bottomLightColor={bottomLightColor} topLightColor={topLightColor} redAlert={redAlert} orangeAlert={orangeAlert} redAlertSent={redAlertSent} orangeAlertSent={orangeAlertSent}')
-    print(f'[DEBUG] enableBStick={enableBStick} enableCozmo={enableCozmo} enableSlack={enableSlack} enableSumo={enableSumo} enableDashboard={enableDashboard}')
+    print(f'[DEBUG] bottomRemoteLightColor={bottomRemoteLightColor} topRemoteLightColor={topRemoteLightColor}')
+    print(f'[DEBUG] enableLocalBStick={enableLocalBStick} enableRemoteBStick={enableRemoteBStick} enableCozmo={enableCozmo} enableSlack={enableSlack} enableSumo={enableSumo} enableDashboard={enableDashboard}')
+
+    # Log debug info
+    postToSumo(f'[DEBUG] bottomLightColor={bottomLightColor} topLightColor={topLightColor} redAlert={redAlert} orangeAlert={orangeAlert} redAlertSent={redAlertSent} orangeAlertSent={orangeAlertSent}', enableSumo)
+    postToSumo(f'[DEBUG] bottomRemoteLightColor={bottomRemoteLightColor} topRemoteLightColor={topRemoteLightColor}', enableSumo)
+    postToSumo(f'[DEBUG] enableLocalBStick={enableLocalBStick} enableRemoteBStick={enableRemoteBStick} enableCozmo={enableCozmo} enableSlack={enableSlack} enableSumo={enableSumo} enableDashboard={enableDashboard}', enableSumo)
 
     print(Fore.RED + '[Protocol/7] ' + Fore.BLUE + '\nEnd of cycle. Next cycle in ' + str(cycleDuration) + ' seconds.')
     print('Now waiting for next cycle to begin', end='', flush=True)
 
+    update_remote_bstick_nano(bottomRemoteLightColor, topRemoteLightColor, 'on', 'flash', enableRemoteBStick, instanceIdentifier)
     for currentStep in range (0,32):
-        bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'flash', enableBStick)
-        # bstickStatus = bstick_control(bottomLightColor, topLightColor, currentStep, enableBStick)
+        bstickStatus = update_local_bstick_nano(bottomLightColor, topLightColor, 'flash', enableLocalBStick)
+        # bstickStatus = bstick_control(bottomLightColor, topLightColor, currentStep, enableLocalBStick)
         print('.', end='', flush=True)
         time.sleep(1)
 
