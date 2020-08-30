@@ -692,6 +692,8 @@ print('')
 print(Fore.RED + 'Instance ID: ' + instanceIdentifier)
 print('')
 print(Fore.GREEN + '')
+# Post config info to Slack
+post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
