@@ -51,33 +51,17 @@ You need to setup [p7devices](https://github.com/TME520/p7devices) in order to e
 
 ### DynamoDB
 
-1. Download and install [AWS DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html).
-2. Install OpenJDK
-```
-$ apt install openjdk-14-jre
-```
-3. Configure AWS access (required even for local DynamoDB)
 
-`$ aws configure`
-```
-[default]
-aws_access_key_id = AAAABBBBCCCCDDDD
-aws_secret_access_key = EEEEFFFFGGGGHHHH
-region = ap-southeast-2
-```
-4. Check your config
-```
-$ aws configure list
-```
-
-## Usage
 
 ### Deploy a Protocol/7 stack in AWS
 
 #### Prerequisites
 
 1. You need a AWS account. You can create one for free and you can use some resources for free too,
-2. The deployment must be triggered from Jenkins.
+2. You need a Sumologic account. You can also create one for free,
+3. You need a Slack workspace. You can create one for free too,
+4. You need a BlinkStick. These must be ordered from UK [here](https://www.blinkstick.com/),
+5. The deployment must be triggered from Jenkins.
 
 #### Preparation
 
@@ -100,7 +84,58 @@ N/A
 
 ### Run Protocol/7 locally
 
-N/A
+1. Download and install [AWS DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html),
+2. Install OpenJDK
+```
+$ apt install openjdk-14-jre
+```
+3. Configure AWS access (required even for local DynamoDB)
+`$ aws configure`
+```
+[default]
+aws_access_key_id = AAAABBBBCCCCDDDD
+aws_secret_access_key = EEEEFFFFGGGGHHHH
+region = ap-southeast-2
+```
+4. Check your config
+```
+$ aws configure list
+```
+5. Start DynamoDB
+`nohup java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -port 8001 > foo.out 2> foo.err < /dev/null &`
+6. Install Python pip and some modules
+`pip install --upgrade pip`
+`pip-3.6 install cozmo exchangelib slackclient blinkstick sklearn pandas nltk joblib argparse boto3 colorama notify2 azure-storage-blob azure-mgmt-compute azure-mgmt-storage azure-mgmt-resource azure-keyvault-secrets azure-storage-blob requests_toolbelt requests azure-devops msrest`
+`pip-3.6 install --user 'cozmo[camera]`
+7. Clone the Protocol/7 repository
+`git clone https://github.com/TME520/protocol7.git`
+8. Create a startup file and follow the configuration instructions from the README file
+```
+cd ./protocol7/
+cp -pv ./startTemplate.sh.template ./startProtocol7.sh
+chmod +x ./startProtocol7.sh
+```
+8. Start Protocol/7
+`nohup ./startProtocol7.sh > foo.out 2> foo.err < /dev/null &`
+9. Clone the Persona/7 repository
+`git clone https://github.com/TME520/persona7.git`
+10. Create a startup file and follow the configuration instructions from the README file
+```
+cd ./persona7/
+cp -pv ./startTemplate.sh.template ./startPersona7.sh
+chmod +x ./startPersona7.sh
+```
+11. Start Persona/7
+`nohup ./startPersona7.sh > foo.out 2> foo.err < /dev/null &`
+12. Clone the p7devices repository
+`git clone https://github.com/TME520/p7devices.git`
+13. Create a startup file and follow the configuration instructions from the README file
+```
+cd ./p7devices/bstick_nano/
+cp -pv ./startBStick.sh.template  ./startBStick.sh
+chmod +x ./startBStick.sh
+```
+14. Start BlinkStick
 
 ### Deploy a Protocol/7 stack in Azure
 
@@ -109,3 +144,5 @@ N/A
 ### Deploy a Protocol/7 stack in Google Cloud
 
 N/A
+
+## Usage
