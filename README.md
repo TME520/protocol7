@@ -77,7 +77,13 @@ N/A
 $ apt install openjdk-14-jre
 ```
 
-3. Configure AWS access (required even for local DynamoDB)
+3. Install AWS CLI
+
+```
+$ apt install awscli
+```
+
+4. Configure AWS access (required even for local DynamoDB)
 
 `$ aws configure`
 
@@ -88,21 +94,21 @@ aws_secret_access_key = EEEEFFFFGGGGHHHH
 region = ap-southeast-2
 ```
 
-4. Check your config
+5. Check your config
 
 ```
 $ aws configure list
 ```
 
-5. Start DynamoDB
+6. Start DynamoDB
 
 `nohup java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -port 8001 > foo.out 2> foo.err < /dev/null &`
 
-6. Install Python3
+7. Install Python3
 
 `$ apt install build-essential libssl-dev libffi-dev python3 python3-pip python3-dev python3-venv python3-pil.imagetk`
 
-7. Install Python pip and some modules
+8. Install Python pip and some modules
 
 `pip install --upgrade pip`
 
@@ -110,11 +116,11 @@ $ aws configure list
 
 `pip-3.6 install --user 'cozmo[camera]'`
 
-8. Clone the Protocol/7 repository
+9. Clone the Protocol/7 repository
 
 `git clone https://github.com/TME520/protocol7.git`
 
-9. Create a startup file and follow the configuration instructions from the README file
+10. Create a startup file and follow the configuration instructions from the README file
 
 ```
 cd ./protocol7/
@@ -122,15 +128,15 @@ cp -pv ./startTemplate.sh.template ./startProtocol7.sh
 chmod +x ./startProtocol7.sh
 ```
 
-10. Start Protocol/7
+11. Start Protocol/7
 
 `nohup ./startProtocol7.sh > foo.out 2> foo.err < /dev/null &`
 
-11. Clone the Persona/7 repository
+12. Clone the Persona/7 repository
 
 `git clone https://github.com/TME520/persona7.git`
 
-12. Create a startup file and follow the configuration instructions from the README file
+13. Create a startup file and follow the configuration instructions from the README file
 
 ```
 cd ./persona7/
@@ -138,15 +144,15 @@ cp -pv ./startTemplate.sh.template ./startPersona7.sh
 chmod +x ./startPersona7.sh
 ```
 
-13. Start Persona/7
+14. Start Persona/7
 
 `nohup ./startPersona7.sh > foo.out 2> foo.err < /dev/null &`
 
-14. Clone the p7devices repository
+15. Clone the p7devices repository
 
 `git clone https://github.com/TME520/p7devices.git`
 
-15. Create a startup file and follow the configuration instructions from the README file
+16. Create a startup file and follow the configuration instructions from the README file
 
 ```
 cd ./p7devices/bstick_nano/
@@ -154,7 +160,7 @@ cp -pv ./startBStick.sh.template  ./startBStick.sh
 chmod +x ./startBStick.sh
 ```
 
-16. Start BlinkStick
+17. Start BlinkStick
 
 ### Deploy a Protocol/7 stack in Azure
 
