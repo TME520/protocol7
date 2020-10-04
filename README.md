@@ -114,7 +114,7 @@ $ aws configure list
 
 `pip3 install cozmo exchangelib slackclient blinkstick sklearn pandas nltk joblib argparse boto3 colorama notify2 azure-storage-blob azure-mgmt-compute azure-mgmt-storage azure-mgmt-resource azure-keyvault-secrets azure-storage-blob requests_toolbelt requests azure-devops msrest`
 
-`pip-3.6 install --user 'cozmo[camera]'`
+`pip3 install --user 'cozmo[camera]'`
 
 9. Clone the Protocol/7 repository
 
