@@ -18,7 +18,7 @@ import boto3
 from botocore.exceptions import ClientError
 import colorama
 from colorama import Fore, Style
-# from azure.storage.blob import BlockBlobService, ContentSettings, ContainerPermissions
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
 from azure.devops.connection import Connection
@@ -109,6 +109,26 @@ if not os.path.exists(logFileFolder):
 dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
+
+def uploadFileToAzure(container_name, path_to_local_file, local_file_name):
+    try:
+        # container_name=container_name, blob_name=dashboardFile, file_path=dashboardUploadFilePath, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10
+        print('Uploading to Azure Storage Account...')
+        blob_service_client = BlobServiceClient.from_connection_string(azure_stor_cnx_string)
+        # Create a blob client using the local file name as the name for the blob
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=local_file_name)
+
+        print("\nUploading to Azure Storage as blob:\n\t" + path_to_local_file)
+
+        my_content_settings = ContentSettings(content_type='text/html')
+
+        # Upload the created file
+        with open(path_to_local_file, "rb") as data:
+            blob_client.upload_blob(data, overwrite=True, content_settings=my_content_settings)
+    except Exception as e:
+        print(f'[ERROR] An error occurred while uploading to Azure Storage Account.\n', e)
+        traceback.print_exc()
+        pass
 
 def uploadFileToS3(file_name, bucket, object_name=None):
     """Upload a file to an S3 bucket
@@ -575,7 +595,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.45'
+version = '0.46'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -621,6 +641,7 @@ emptyCreds = { 'foo' : 'bar' }
 container_name = '$web'
 azure_stor_acc_name = os.getenv('AZSTORACCNAME')
 azure_stor_acc_key = os.getenv('AZSTORACCKEY')
+azure_stor_cnx_string = os.getenv('AZCNXSTRING')
 dashboardFilename = os.getenv('DASHBOARDFILENAME')
 advancedDashboardFilename = os.getenv('ADVDASHBOARDFILENAME')
 dashboardFile = dashboardFilename
@@ -1011,9 +1032,7 @@ while True:
         if azureDashboard == '1':
             print(f'Updating {dashboardFile} on {azure_stor_acc_name}...')
             try:
-                block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
-                if block_blob_service.exists(container_name):
-                    block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile, file_path=dashboardUploadFilePath, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
+                uploadFileToAzure(container_name, dashboardUploadFilePath, dashboardFile)
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{dashboardFilename}')
             except Exception as e:
@@ -1037,9 +1056,7 @@ while True:
         if azureDashboard == '1':
             print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
             try:
-                block_blob_service = BlockBlobService(account_name=azure_stor_acc_name, account_key=azure_stor_acc_key, socket_timeout=10)
-                if block_blob_service.exists(container_name):
-                    block_blob_service.create_blob_from_path(container_name=container_name, blob_name=dashboardFile2, file_path=dashboardUploadFilePath2, content_settings=ContentSettings(content_type='text/html'), metadata=None, validate_content=False, progress_callback=None, max_connections=2, lease_id=None, if_modified_since=None, if_unmodified_since=None, if_match=None, if_none_match=None, timeout=10)
+                uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
                 print('...done.')
                 print(f'You can check the dashboard here: http://{dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
