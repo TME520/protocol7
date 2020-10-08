@@ -25,6 +25,9 @@ from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 import socket
 import importlib
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 try:
     import slack
@@ -595,7 +598,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.46'
+version = '0.46.1'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
