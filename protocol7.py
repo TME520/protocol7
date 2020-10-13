@@ -778,7 +778,7 @@ while True:
     dashboardText = dashboardText + '.flex-container div.deployment{background: #0f8ce6;}'
     dashboardText = dashboardText + '.flex-container div.grey{background: #c0c0c0;}'
     dashboardText = dashboardText + '</style></head><body><center><h1>Refreshed: ' + dashboardTStamp + '</h1></center>'
-    dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + dashboardTitle + ' (' + dashboardTStamp + ')' + '</title>'
+    dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + dashboardTitle + ' (' + ISOTStamp + ')' + '</title>'
     dashboardText2 = dashboardText2 + '<script>window.setInterval("refresh()", 20000); function refresh() { window.location.reload() }</script>'
     dashboardText2 = dashboardText2 + '<style>* { box-sizing: border-box; } .columns { float: left; width: 20%; padding: 8px; } body { background-color: #2F2E30; }'
     dashboardText2 = dashboardText2 + '.application_up { border-top: 20px solid #73D87D; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
