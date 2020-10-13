@@ -61,6 +61,7 @@ clientName = os.environ.get('CLIENT')
 environment = os.environ.get('ENV')
 projectName = os.environ.get('PROJECT')
 instanceIdentifier = f'{instanceName}##{clientName}##{projectName}##{environment}'
+dashboardTitle = f'{clientName} - {environment}'
 # Preferences
 # 0 = False
 # 1 = True
