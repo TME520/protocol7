@@ -598,7 +598,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.46.1'
+version = '0.46.2'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -768,7 +768,7 @@ while True:
     slackMsgLine5 = ''
     slackMsgLine6 = ''
     failuresCntr = 0
-    dashboardText = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>dashboard - Applications monitoring</title>'
+    dashboardText = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + instanceIdentifier + '</title>'
     dashboardText = dashboardText + '<style>.flex-container {width: 80%; min-height: 100px; margin: 0 auto; font-size: 32px; display: -webkit-flex; display: flex; border: 1px solid #808080;}'
     dashboardText = dashboardText + '.flex-container div {padding: 10px; background: #dbdfe5; -webkit-flex: 1; -ms-flex: 1; flex: 1;}'
     dashboardText = dashboardText + '.flex-container div.up{background: #06d519;}'
@@ -777,7 +777,7 @@ while True:
     dashboardText = dashboardText + '.flex-container div.deployment{background: #0f8ce6;}'
     dashboardText = dashboardText + '.flex-container div.grey{background: #c0c0c0;}'
     dashboardText = dashboardText + '</style></head><body><center><h1>Refreshed: ' + dashboardTStamp + '</h1></center>'
-    dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>dashboard - Advanced applications monitoring</title>'
+    dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + instanceIdentifier + '</title>'
     dashboardText2 = dashboardText2 + '<script>window.setInterval("refresh()", 20000); function refresh() { window.location.reload() }</script>'
     dashboardText2 = dashboardText2 + '<style>* { box-sizing: border-box; } .columns { float: left; width: 20%; padding: 8px; } body { background-color: #2F2E30; }'
     dashboardText2 = dashboardText2 + '.application_up { border-top: 20px solid #73D87D; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
