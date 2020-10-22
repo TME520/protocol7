@@ -25,6 +25,7 @@ from azure.devops.connection import Connection
 from msrest.authentication import BasicAuthentication
 import socket
 import importlib
+import pymsteams
 import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -71,6 +72,8 @@ enableCozmo = '0'
 enableSlack = os.environ.get('ENABLESLACK')
 enableSumo = os.environ.get('ENABLESUMO')
 enableDashboard = os.environ.get('ENABLEDASH')
+enableMSTeams = os.environ.get('ENABLEMSTEAMS')
+msTeamsWebhook = os.environ.get('MSTEAMSWEBHOOK')
 
 # Import the URLs to test from config file
 configFile = os.environ.get('CONFIGFILE')
@@ -98,6 +101,10 @@ if enableDashboard == '0':
 	print(f'[INFO] dashboard is OFF')
 else:
 	print(f'[INFO] dashboard is ON')
+if enableMSTeams == '0':
+	print(f'[INFO] MS Teams messaging is OFF')
+else:
+	print(f'[INFO] MS Teams messaging is ON')
 
 # Path to data folder (contains ML stuff)
 cb1DataFolder = os.environ.get('CB1DATAFOLDER')
@@ -113,6 +120,17 @@ if not os.path.exists(logFileFolder):
 dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
+
+def postMessageToMSTeams(msteamsMessage):
+    if enableMSTeams == '1':
+        try:
+            myTeamsMessage = pymsteams.connectorcard(msTeamsWebhook)
+            myTeamsMessage.text(msteamsMessage)
+            myTeamsMessage.send()
+            print(f'[postMessageToMSTeams] {msteamsMessage}')
+        except Exception as e:
+            print('[ERROR] Failed to post message to MS Teams.\n', e)
+            pass
 
 def uploadFileToAzure(container_name, path_to_local_file, local_file_name):
     try:
@@ -599,7 +617,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.46.2'
+version = '0.47'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -719,6 +737,7 @@ print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
 post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
+postMessageToMSTeams(f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}')
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
@@ -855,6 +874,7 @@ while True:
                     slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                    postMessageToMSTeams(slackAlertText)
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['orange_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
@@ -931,6 +951,7 @@ while True:
                     slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                    postMessageToMSTeams(slackAlertText)
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['orange_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
@@ -977,6 +998,7 @@ while True:
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                         slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                        postMessageToMSTeams(slackAlertText)
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
@@ -996,6 +1018,7 @@ while True:
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                         slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
+                        postMessageToMSTeams(slackAlertText)
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
@@ -1099,6 +1122,7 @@ while True:
     # post_message_to_slack(slackLogChannel, slackStatusText, ':coc1:', enableSlack)
     if publishNewGKAdvice == 'yes':
         post_message_to_slack(slackGKAdviceChannel, slackStatusText, ':coc1:', enableSlack)
+        postMessageToMSTeams(slackStatusText)
 
     if firstRun == 0:
         firstRun = 1
