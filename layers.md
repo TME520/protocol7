@@ -68,3 +68,20 @@
 | Field | Type | Defined / Computed | Example |
 | ----- | ---- | ------------------ | ------- |
 | appname | String | D | Google |
+| customer | String | D | Google search |
+| url | String | D | https://www.google.com |
+| credentials | KVP | D | { 'foo' : 'bar' } |
+| payload | String | C | HTTP 200 OK |
+| failure_history | Array | C | [0,0,0,0,0,0] |
+| rt_history | Array | C | [0,0,0,0,0,0] |
+| orange_since | String | C | Sunday 25 October @ 16:50 |
+| red_since | String | C | Sunday 25 October @ 16:50 |
+| orange_sent | Integer | C | 0 |
+| red_sent | Integer | C | 1 |
+| release_def_ids | Array | D | [0] |
+| latest_deployment | String | C | None |
+| protocol | String | D | HTTP |
+| retries | Integer | D | 3 |
+| timeout | Integer | D | 10 |
+| success | Array | D | [200,301] |
+| failure | Array | D | [401,404,500,503] |
