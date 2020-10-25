@@ -43,6 +43,8 @@
 
 ## Layer data format (JSON structure)
 
+### Current
+
 ```
 'GOOGLE':{
     'appname':'Google',
@@ -60,3 +62,9 @@
     'latest_deployment':'None'
     }
 ```
+
+### Updated
+
+| Field | Type | Defined / Computed | Example |
+| ----- | ---- | ------------------ | ------- |
+| appname | String | D | Google |
