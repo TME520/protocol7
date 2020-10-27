@@ -121,11 +121,12 @@ dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
 
-def postMessageToMSTeams(msteamsMessage, colorTheme):
+def postMessageToMSTeams(msteamsMessage, colorTheme, cardTitle):
     if enableMSTeams == '1':
         try:
             myTeamsMessage = pymsteams.connectorcard(msTeamsWebhook)
             myTeamsMessage.color(colorTheme)
+            myTeamsMessage.title(cardTitle)
             myTeamsMessage.text(msteamsMessage)
             myTeamsMessage.send()
             print(f'[postMessageToMSTeams] {msteamsMessage}')
@@ -738,7 +739,7 @@ print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
 post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
-postMessageToMSTeams(f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', '109be6')
+postMessageToMSTeams(f'Config data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', '109be6', 'Protocol/7 server started')
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
@@ -875,7 +876,7 @@ while True:
                     slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'e68210')
+                    postMessageToMSTeams(slackAlertText, 'e68210', 'Orange warning')
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['orange_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
@@ -952,7 +953,7 @@ while True:
                     slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'e68210')
+                    postMessageToMSTeams(slackAlertText, 'e68210', 'Orange warning')
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['orange_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
@@ -999,7 +1000,7 @@ while True:
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                         slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'e68210')
+                        postMessageToMSTeams(slackAlertText, 'e68210', 'Orange warning')
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
@@ -1019,7 +1020,7 @@ while True:
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                         slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'eb4034')
+                        postMessageToMSTeams(slackAlertText, 'eb4034', 'Red warning')
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
@@ -1123,7 +1124,7 @@ while True:
     # post_message_to_slack(slackLogChannel, slackStatusText, ':coc1:', enableSlack)
     if publishNewGKAdvice == 'yes':
         post_message_to_slack(slackGKAdviceChannel, slackStatusText, ':coc1:', enableSlack)
-        postMessageToMSTeams(slackStatusText, 'ededed')
+        postMessageToMSTeams(slackStatusText, 'ededed', '')
 
     if firstRun == 0:
         firstRun = 1
