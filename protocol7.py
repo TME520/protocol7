@@ -925,7 +925,7 @@ while True:
         currentRespTime = round(currentRespTime,1)
         dashboardText2 = dashboardText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(urlList[currentItem]['appname']) + '</b><br/><font class="customer_name">' + urlList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: ' + urlList[currentItem]["latest_deployment"] + '</p></div></div>'
         print(f'- Resp. time: {currentRespTime} seconds\n')
-        newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmd={yyyymmd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
+        newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
 
@@ -1049,7 +1049,7 @@ while True:
         currentRespTime = round(currentRespTime,1)
         dashboardText2 = dashboardText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(ntAPICountriesList[currentItem]['longName']) + '</b><br/><font class="customer_name">' + ntAPICountriesList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: None</p></div></div>'
         print(f'- Resp. time: {currentRespTime} seconds\n')
-        newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmd={yyyymmd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{ntAPICountriesList[currentItem]["longName"]}\" customer=\"{ntAPICountriesList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"N/A\" color=\"{currentColor}\"\n'
+        newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{ntAPICountriesList[currentItem]["longName"]}\" customer=\"{ntAPICountriesList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"N/A\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
 
