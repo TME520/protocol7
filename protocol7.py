@@ -619,7 +619,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.2'
+version = '0.47.3'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -900,6 +900,7 @@ while True:
                     slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
+                    postMessageToMSTeams(slackAlertText, 'ed0909', 'Red alert')
                     robotText = 'Attention please, we currently have an issue.'
                     urlList[currentItem]['red_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
@@ -976,6 +977,7 @@ while True:
                     slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
+                    postMessageToMSTeams(slackAlertText, 'ed0909', 'Red alert')
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['red_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
@@ -1023,7 +1025,7 @@ while True:
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                         slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'eb4034', 'Red warning')
+                        postMessageToMSTeams(slackAlertText, 'ed0909', 'Red warning')
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
