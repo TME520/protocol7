@@ -619,7 +619,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.3'
+version = '0.47.4'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -739,7 +739,7 @@ print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
 post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
-postMessageToMSTeams(f'Config data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', '109be6', 'Protocol/7 server started')
+postMessageToMSTeams(f'Config data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', '47A7FF', 'Protocol/7 server started')
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
@@ -856,55 +856,83 @@ while True:
             print(f'- Test history over the last 6 cycles: {urlList[currentItem]["failure_history"]}')
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
             print(f'- Number of failures: {failuresCntr}')
-            if failuresCntr == 1 and payload != 'INETERROR':
-                currentHeader = 'application_up'
-                currentStatus = '<font color="red"><b>/!\ Last test failed</b></font>'
-                currentColor = 'green'
-            elif failuresCntr == 1 and payload == 'INETERROR':
-                currentHeader = 'application_grey'
-                currentStatus = '<font color="orange"><b>Internet cnx failed during test</b></font>'
-                currentColor = 'grey'
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
+            if failuresCntr == 1:
+                if payload == 'URLERROR':
+                    currentHeader = 'application_up'
+                    currentStatus = '<font color="red"><b>/!\ Last test failed</b></font>'
+                    currentColor = 'green'
+                elif payload == 'INETERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Internet cnx failed during test</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
+                elif payload == 'HTTPERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
             elif (failuresCntr >= 2) and (failuresCntr <= 5):
-                print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
-                orangeAlert = 1
-                currentHeader = 'application_incident'
-                if urlList[currentItem]['orange_since'] == '-':
-                    urlList[currentItem]['orange_since'] = dashboardTStamp
-                currentStatus = f'Since {urlList[currentItem]["orange_since"]}'
-                currentColor = 'orange'
-                print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
-                if urlList[currentItem]['orange_sent'] == 0:
-                    slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                    slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
-                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                    post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'e68210', 'Orange warning')
-                    robotText = 'Attention please, we currently have an issue.'
-                    urlList[currentItem]['orange_sent'] = 1
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
-                robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
+                if payload == 'URLERROR':
+                    print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
+                    orangeAlert = 1
+                    currentHeader = 'application_incident'
+                    if urlList[currentItem]['orange_since'] == '-':
+                        urlList[currentItem]['orange_since'] = dashboardTStamp
+                    currentStatus = f'Since {urlList[currentItem]["orange_since"]}'
+                    currentColor = 'orange'
+                    print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
+                    if urlList[currentItem]['orange_sent'] == 0:
+                        slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
+                        slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
+                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                        post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                        postMessageToMSTeams(slackAlertText, 'FF904F', 'Orange warning')
+                        robotText = 'Attention please, we currently have an issue.'
+                        urlList[currentItem]['orange_sent'] = 1
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
+                    robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
+                elif payload == 'INETERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Internet cnx failed during test</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
+                elif payload == 'HTTPERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
             elif failuresCntr >= 6:
-                print('[RED] Failures count of 6+ triggered a red alert')
-                redAlert = 1
-                currentHeader = 'application_down'
-                if urlList[currentItem]['orange_since'] != '-':
-                    urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
-                elif urlList[currentItem]['red_since'] == '-':
-                    urlList[currentItem]['red_since'] = dashboardTStamp
-                currentStatus = f'Since {urlList[currentItem]["red_since"]}'
-                currentColor = 'red'
-                print(f'- {urlList[currentItem]["appname"]} is DOWN')
-                if urlList[currentItem]['red_sent'] == 0:
-                    slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
-                    slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
-                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                    post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'ed0909', 'Red alert')
-                    robotText = 'Attention please, we currently have an issue.'
-                    urlList[currentItem]['red_sent'] = 1
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
-                robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
+                if payload == 'URLERROR':
+                    print('[RED] Failures count of 6+ triggered a red alert')
+                    redAlert = 1
+                    currentHeader = 'application_down'
+                    if urlList[currentItem]['orange_since'] != '-':
+                        urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
+                    elif urlList[currentItem]['red_since'] == '-':
+                        urlList[currentItem]['red_since'] = dashboardTStamp
+                    currentStatus = f'Since {urlList[currentItem]["red_since"]}'
+                    currentColor = 'red'
+                    print(f'- {urlList[currentItem]["appname"]} is DOWN')
+                    if urlList[currentItem]['red_sent'] == 0:
+                        slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
+                        slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
+                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                        post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
+                        postMessageToMSTeams(slackAlertText, 'ed0909', 'Red alert')
+                        robotText = 'Attention please, we currently have an issue.'
+                        urlList[currentItem]['red_sent'] = 1
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
+                    robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
+                elif payload == 'INETERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Internet cnx failed during test</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
+                elif payload == 'HTTPERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
         if payload == 'HTTPERROR':
             pinkCounter += 1
             urlList[currentItem]['payload'] = 'HTTPERROR'
@@ -957,7 +985,7 @@ while True:
                     slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                     slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                     post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'e68210', 'Orange warning')
+                    postMessageToMSTeams(slackAlertText, 'FF904F', 'Orange warning')
                     robotText = 'Attention please, we currently have an issue.'
                     ntAPICountriesList[currentItem]['orange_sent'] = 1
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
@@ -1005,7 +1033,7 @@ while True:
                         slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
                         slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
                         post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'e68210', 'Orange warning')
+                        postMessageToMSTeams(slackAlertText, 'FF904F', 'Orange warning')
                         robotText = 'Attention please, we currently have an issue.'
                         ntAPICountriesList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
@@ -1129,7 +1157,7 @@ while True:
     # post_message_to_slack(slackLogChannel, slackStatusText, ':coc1:', enableSlack)
     if publishNewGKAdvice == 'yes':
         post_message_to_slack(slackGKAdviceChannel, slackStatusText, ':coc1:', enableSlack)
-        postMessageToMSTeams(slackStatusText, 'ededed', '')
+        postMessageToMSTeams(slackStatusText, 'C0C0C0', '')
 
     if firstRun == 0:
         firstRun = 1
