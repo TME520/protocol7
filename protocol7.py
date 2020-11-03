@@ -495,7 +495,7 @@ def callURL(url2call, creds):
         pass
     except Exception as e:
         print(f'[ERROR] Failed to open {url2call}.\nOther exception.', e)
-        return 'HTTPERROR', 0
+        return 'OTHERERROR', 0
         pass
 
 def post_message_to_slack(slackLogChannel, slackMessage, slackEmoji, enableSlack):
@@ -619,7 +619,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.4'
+version = '0.47.5'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -833,7 +833,7 @@ while True:
     for currentItem in urlList:
         print('Calling ' + urlList[currentItem]['url'])
         payload, urlList[currentItem]['rt_history'][cycleCntr] = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
-        if (payload != 'HTTPERROR') and (payload != 'URLERROR') and (payload != 'INETERROR'):
+        if (payload != 'HTTPERROR') and (payload != 'URLERROR') and (payload != 'INETERROR') and (payload != 'OTHERERROR'):
             # UP
             urlList[currentItem]['payload'] = payload
             if urlList[currentItem]['latest_deployment'] == 'None':
@@ -871,6 +871,11 @@ while True:
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
+                elif payload == 'OTHERERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Other error</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
             elif (failuresCntr >= 2) and (failuresCntr <= 5):
                 if payload == 'URLERROR':
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
@@ -901,6 +906,11 @@ while True:
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
+                elif payload == 'OTHERERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Other error</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
             elif failuresCntr >= 6:
                 if payload == 'URLERROR':
                     print('[RED] Failures count of 6+ triggered a red alert')
@@ -933,6 +943,11 @@ while True:
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
+                elif payload == 'OTHERERROR':
+                    currentHeader = 'application_grey'
+                    currentStatus = '<font color="orange"><b>Other error</b></font>'
+                    currentColor = 'grey'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
         if payload == 'HTTPERROR':
             pinkCounter += 1
             urlList[currentItem]['payload'] = 'HTTPERROR'
@@ -946,6 +961,11 @@ while True:
         elif payload == 'INETERROR':
             urlList[currentItem]['payload'] = 'INETERROR'
             print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
+        elif payload == 'OTHERERROR':
+            whiteCounter += 1
+            urlList[currentItem]['payload'] = 'OTHERERROR'
+            print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
+            dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHERERROR</div></div></div>'
         print(f'- Response time history over the last 6 cycles: {urlList[currentItem]["rt_history"]}')
         currentFailtage = (failuresCntr / 6) * 100
         currentFailtage = round(currentFailtage,1)
