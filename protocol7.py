@@ -619,7 +619,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.5'
+version = '0.47.6'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -801,6 +801,7 @@ while True:
     dashboardText = dashboardText + '.flex-container div.incident{background: #d59606;}'
     dashboardText = dashboardText + '.flex-container div.deployment{background: #0f8ce6;}'
     dashboardText = dashboardText + '.flex-container div.grey{background: #c0c0c0;}'
+    dashboardText = dashboardText + '.flex-container div.pink{background: #ff4fea;}'
     dashboardText = dashboardText + '</style></head><body><center><h1>Refreshed: ' + dashboardTStamp + '</h1></center>'
     dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + dashboardTitle + ' (' + ISOTStamp + ')' + '</title>'
     dashboardText2 = dashboardText2 + '<script>window.setInterval("refresh()", 20000); function refresh() { window.location.reload() }</script>'
@@ -810,6 +811,7 @@ while True:
     dashboardText2 = dashboardText2 + '.application_incident { border-top: 20px solid #FF904F; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
     dashboardText2 = dashboardText2 + '.application_deployment { border-top: 20px solid #47A7FF; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
     dashboardText2 = dashboardText2 + '.application_grey { border-top: 20px solid #C0C0C0; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_pink { border-top: 20px solid #FF4FEA; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
     dashboardText2 = dashboardText2 + '.app_name { font-size: 40px; font-weight: bold; } .customer_name { font-size: 30px; } p { margin: 20px; } @media only screen and (max-width: 600px) { .columns { width: 100%; }}'
     dashboardText2 = dashboardText2 + '</style></head><body>'
     currentFailtage = 0
@@ -867,10 +869,10 @@ while True:
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
                 elif payload == 'HTTPERROR':
-                    currentHeader = 'application_grey'
+                    currentHeader = 'application_pink'
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
-                    currentColor = 'grey'
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
+                    currentColor = 'pink'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
                 elif payload == 'OTHERERROR':
                     currentHeader = 'application_grey'
                     currentStatus = '<font color="orange"><b>Other error</b></font>'
@@ -902,10 +904,10 @@ while True:
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
                 elif payload == 'HTTPERROR':
-                    currentHeader = 'application_grey'
+                    currentHeader = 'application_pink'
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
-                    currentColor = 'grey'
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
+                    currentColor = 'pink'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
                 elif payload == 'OTHERERROR':
                     currentHeader = 'application_grey'
                     currentStatus = '<font color="orange"><b>Other error</b></font>'
@@ -939,10 +941,10 @@ while True:
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
                 elif payload == 'HTTPERROR':
-                    currentHeader = 'application_grey'
+                    currentHeader = 'application_pink'
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
-                    currentColor = 'grey'
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">CREDS ISSUE</div></div></div>'
+                    currentColor = 'pink'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
                 elif payload == 'OTHERERROR':
                     currentHeader = 'application_grey'
                     currentStatus = '<font color="orange"><b>Other error</b></font>'
