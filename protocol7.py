@@ -619,7 +619,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.6'
+version = '0.47.7'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -880,6 +880,7 @@ while True:
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
             elif (failuresCntr >= 2) and (failuresCntr <= 5):
                 if payload == 'URLERROR':
+                    # INet OK, test failed
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
                     currentHeader = 'application_incident'
@@ -889,21 +890,34 @@ while True:
                     currentColor = 'orange'
                     print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
                     if urlList[currentItem]['orange_sent'] == 0:
-                        slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                        slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
-                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                        post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'FF904F', 'Orange warning')
+                        if enableSlack == '1':
+                            slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                        if enableMSTeams == '1':
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning')
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
                     robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
                 elif payload == 'INETERROR':
+                    # INet KO
                     currentHeader = 'application_grey'
                     currentStatus = '<font color="orange"><b>Internet cnx failed during test</b></font>'
                     currentColor = 'grey'
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
                 elif payload == 'HTTPERROR':
+                    # Creds KO
                     currentHeader = 'application_pink'
                     currentStatus = '<font color="orange"><b>Credentials were refused</b></font>'
                     currentColor = 'pink'
@@ -961,8 +975,10 @@ while True:
             print('[ERROR] URLERROR (white light) for ' + str(urlList[currentItem]['url']))
             dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">URLERROR</div></div></div>'
         elif payload == 'INETERROR':
+            whiteCounter += 1
             urlList[currentItem]['payload'] = 'INETERROR'
             print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
+            dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INETERROR</div></div></div>'
         elif payload == 'OTHERERROR':
             whiteCounter += 1
             urlList[currentItem]['payload'] = 'OTHERERROR'
@@ -977,131 +993,6 @@ while True:
         dashboardText2 = dashboardText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(urlList[currentItem]['appname']) + '</b><br/><font class="customer_name">' + urlList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: ' + urlList[currentItem]["latest_deployment"] + '</p></div></div>'
         print(f'- Resp. time: {currentRespTime} seconds\n')
         newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
-        writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
-        postToSumo(newLogLine, enableSumo)
-
-    # NT API endpoints
-    print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now check NT API.')
-    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>Nashtech API</b>'
-    for currentItem in ntAPICountriesList:
-        print('\nTesting ' + ntAPICountriesList[currentItem]['longName'])
-        currentHTTPResponse, currentHTTPStatusCode, currentResponseTime, currentToken = generateNTAPIToken(ntAPICountriesList[currentItem]['authURL'], ntAPICountriesList[currentItem]['shortName'])
-        if currentHTTPStatusCode != 200:
-            ntAPICountriesList[currentItem]['failure_history'][cycleCntr] = 1
-            print(f'- Test history over the last 6 cycles: {ntAPICountriesList[currentItem]["failure_history"]}')
-            failuresCntr = ntAPICountriesList[currentItem]["failure_history"].count(1)
-            print(f'- Number of failures: {failuresCntr}')
-            if failuresCntr == 1:
-                currentHeader = 'application_up'
-                currentStatus = '<font color="red"><b>/!\ Last test failed</b></font>'
-            elif (failuresCntr >= 2) and (failuresCntr <= 5):
-                print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
-                orangeAlert = 1
-                currentHeader = 'application_incident'
-                if ntAPICountriesList[currentItem]['orange_since'] == '-':
-                    ntAPICountriesList[currentItem]['orange_since'] = dashboardTStamp
-                currentStatus = f'Since {ntAPICountriesList[currentItem]["orange_since"]}'
-                print(f'- {ntAPICountriesList[currentItem]["longName"]} is UNKNOWN')
-                if ntAPICountriesList[currentItem]['orange_sent'] == 0:
-                    slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                    slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                    post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'FF904F', 'Orange warning')
-                    robotText = 'Attention please, we currently have an issue.'
-                    ntAPICountriesList[currentItem]['orange_sent'] = 1
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
-                robotText = robotText + f'Token  generation for {ntAPICountriesList[currentItem]["longName"]} failed.'
-            elif failuresCntr >= 6:
-                print('[RED] Failures count of 6+ triggered a red alert')
-                redAlert = 1
-                currentHeader = 'application_down'
-                if ntAPICountriesList[currentItem]['orange_since'] != '-':
-                    ntAPICountriesList[currentItem]['red_since'] = ntAPICountriesList[currentItem]['orange_since']
-                elif ntAPICountriesList[currentItem]['red_since'] == '-':
-                    ntAPICountriesList[currentItem]['red_since'] = dashboardTStamp
-                currentStatus = f'Since {ntAPICountriesList[currentItem]["red_since"]}'
-                print(f'- {ntAPICountriesList[currentItem]["longName"]} is DOWN')
-                if ntAPICountriesList[currentItem]['red_sent'] == 0:
-                    slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
-                    slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                    post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
-                    postMessageToMSTeams(slackAlertText, 'ed0909', 'Red alert')
-                    robotText = 'Attention please, we currently have an issue.'
-                    ntAPICountriesList[currentItem]['red_sent'] = 1
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">Token fail (' + dashboardTStamp + ').</div></div></div>'
-                robotText = robotText + f'Token  generation for {ntAPICountriesList[currentItem]["longName"]} failed again.'
-        else:
-            currentHTTPResponse, currentHTTPStatusCode, currentResponseTime = testNTAPI(ntAPICountriesList[currentItem]['callURL'], ntAPICountriesList[currentItem]['shortName'], currentToken, 42, epoch, epoch)
-            if currentHTTPStatusCode != 200:
-                ntAPICountriesList[currentItem]['failure_history'][cycleCntr] = 1
-                print(f'- Test history over the last 6 cycles: {ntAPICountriesList[currentItem]["failure_history"]}')
-                failuresCntr = ntAPICountriesList[currentItem]["failure_history"].count(1)
-                print(f'- Number of failures: {failuresCntr}')
-                if failuresCntr == 1:
-                    currentHeader = 'application_up'
-                    currentStatus = '<font color="red"><b>/!\ Last test failed</b></font>'
-                elif (failuresCntr >= 2) and (failuresCntr <= 5):
-                    print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
-                    orangeAlert = 1
-                    currentHeader = 'application_incident'
-                    if ntAPICountriesList[currentItem]['orange_since'] == '-':
-                        ntAPICountriesList[currentItem]['orange_since'] = dashboardTStamp
-                    currentStatus = f'Since {ntAPICountriesList[currentItem]["orange_since"]}'
-                    print(f'- {ntAPICountriesList[currentItem]["longName"]} is UNKNOWN')
-                    if ntAPICountriesList[currentItem]['orange_sent'] == 0:
-                        slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                        slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                        post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'FF904F', 'Orange warning')
-                        robotText = 'Attention please, we currently have an issue.'
-                        ntAPICountriesList[currentItem]['orange_sent'] = 1
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
-                    robotText = robotText + f'{ntAPICountriesList[currentItem]["longName"]} is DOWN.'
-                elif failuresCntr >= 6:
-                    print('[RED] Failures count of 6+ triggered a red alert')
-                    redAlert = 1
-                    currentHeader = 'application_down'
-                    if ntAPICountriesList[currentItem]['orange_since'] != '-':
-                        ntAPICountriesList[currentItem]['red_since'] = ntAPICountriesList[currentItem]['orange_since']
-                    elif ntAPICountriesList[currentItem]['red_since'] == '-':
-                        ntAPICountriesList[currentItem]['red_since'] = dashboardTStamp
-                    currentStatus = f'Since {ntAPICountriesList[currentItem]["red_since"]}'
-                    print(f'- {ntAPICountriesList[currentItem]["longName"]} is DOWN')
-                    if ntAPICountriesList[currentItem]['red_sent'] == 0:
-                        slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
-                        slackAlertText = slackAlertText + 'Token generation for ' + ntAPICountriesList[currentItem]['longName'] + ' FAILED\n'
-                        slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                        post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
-                        postMessageToMSTeams(slackAlertText, 'ed0909', 'Red warning')
-                        robotText = 'Attention please, we currently have an issue.'
-                        ntAPICountriesList[currentItem]['red_sent'] = 1
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(ntAPICountriesList[currentItem]['longName']) + '</b><div class="down">DOWN</div></div></div>'
-                    robotText = robotText + f'{ntAPICountriesList[currentItem]["longName"]} is still DOWN.'
-            else:
-                ntAPICountriesList[currentItem]['failure_history'][cycleCntr] = 0
-                print(f'- Test history over the last 6 cycles: {ntAPICountriesList[currentItem]["failure_history"]}')
-                failuresCntr = ntAPICountriesList[currentItem]["failure_history"].count(1)
-                print(f'- Number of failures: {failuresCntr}')
-                dashboardText = dashboardText + '<div class="foo"><div class="up">' + ntAPICountriesList[currentItem]['longName'] + ' UP</div></div>'
-                currentHeader = 'application_up'
-                currentStatus = 'Healthy'
-                ntAPICountriesList[currentItem]['orange_since'] = '-'
-                ntAPICountriesList[currentItem]['red_since'] = '-'
-                ntAPICountriesList[currentItem]['orange_sent'] = 0
-                ntAPICountriesList[currentItem]['red_sent'] = 0
-                ntAPICountriesList[currentItem]['rt_history'][cycleCntr] = currentResponseTime
-        print(f'- Response time history over the last 6 cycles: {ntAPICountriesList[currentItem]["rt_history"]}')
-        currentFailtage = (failuresCntr / 6) * 100
-        currentFailtage = round(currentFailtage,1)
-        print(f'- Failtage: {currentFailtage}%')
-        currentRespTime = (ntAPICountriesList[currentItem]["rt_history"][0] + ntAPICountriesList[currentItem]["rt_history"][1] + ntAPICountriesList[currentItem]["rt_history"][2] + ntAPICountriesList[currentItem]["rt_history"][3] + ntAPICountriesList[currentItem]["rt_history"][4] + ntAPICountriesList[currentItem]["rt_history"][5]) / 6
-        currentRespTime = round(currentRespTime,1)
-        dashboardText2 = dashboardText2 + '<div class="columns"><div class="' + currentHeader + '"><p><b class="app_name">' + str(ntAPICountriesList[currentItem]['longName']) + '</b><br/><font class="customer_name">' + ntAPICountriesList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/> <b>Deployments</b>: None</p></div></div>'
-        print(f'- Resp. time: {currentRespTime} seconds\n')
-        newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{ntAPICountriesList[currentItem]["longName"]}\" customer=\"{ntAPICountriesList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"N/A\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
 
