@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.7'
+version = '0.47.8'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -836,6 +836,14 @@ while True:
     for currentItem in urlList:
         print('Calling ' + urlList[currentItem]['url'])
         payload, urlList[currentItem]['rt_history'][cycleCntr], http_status = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
+        if http_status in urlList[currentItem]['success']:
+            print('Success')
+        elif http_status in urlList[currentItem]['failure']:
+            print('Failure')
+        elif http_status in urlList[currentItem]['maintenance']:
+            print('Maintenance')
+        else
+            print('Failed for unknown reason')
         if (payload != 'HTTPERROR') and (payload != 'URLERROR') and (payload != 'INETERROR') and (payload != 'OTHERERROR'):
             # UP
             urlList[currentItem]['payload'] = payload
