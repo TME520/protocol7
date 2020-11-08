@@ -483,10 +483,12 @@ def callURL(url2call, creds):
         return payload, load_elapsed, http_status
     except urllib.error.HTTPError as e:
         print(f'[HTTPError] Exception: {e}\nFailed to call {url2call}\nProvider might be down or credentials might have expired.')
+        print(f'HTTP: {response.getcode()}')
         return 'HTTPERROR', 0, e
         pass
     except urllib.error.URLError as f:
         print(f'[URLError] Exception: {f}\nFailed to call {url2call}\nNetwork connection issue.')
+        print(f'HTTP: {response.getcode()}')
         if checkInternetAccess():
             print('[INFO] Internet access is OK.')
             return 'URLERROR', 0, f
@@ -496,6 +498,7 @@ def callURL(url2call, creds):
         pass
     except Exception as g:
         print(f'[ERROR] Exception: {g}\nFailed to open {url2call}.\nOther exception.')
+        print(f'HTTP: {response.getcode()}')
         return 'OTHERERROR', 0, g
         pass
 
