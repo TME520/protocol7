@@ -121,16 +121,6 @@ dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
 
-def checkHTTPStatus(url2call, creds, successList, failureList, maintenanceList):
-    try:
-        r = requests.head(url2call)
-        print(f'HTTP status code for {url2call}: {r.status_code}')
-        return r.status_code
-    except requests.ConnectionError:
-        print(f'[ERROR] Failed to open {url2call}.\nOther exception.', e)
-        return 'OTHERERROR', 0
-        pass
-
 def postMessageToMSTeams(msteamsMessage, colorTheme, cardTitle):
     if enableMSTeams == '1':
         try:
@@ -488,24 +478,25 @@ def callURL(url2call, creds):
         response = urllib.request.urlopen(req, timeout=10)
         load_elapsed = round(time.time() - start, 2)
         payload = response.read()
-        print(f'load_elapsed={load_elapsed}')
-        return payload, load_elapsed
-    except urllib.error.HTTPError:
-        print(f'[HTTPError] Failed to call {url2call}\nProvider might be down or credentials might have expired.')
-        return 'HTTPERROR', 0
+        http_status = response.getcode()
+        print(f'load_elapsed: {load_elapsed}, http_status: {http_status}')
+        return payload, load_elapsed, http_status
+    except urllib.error.HTTPError as e:
+        print(f'[HTTPError] Exception: {e}\nFailed to call {url2call}\nProvider might be down or credentials might have expired.')
+        return 'HTTPERROR', 0, e
         pass
-    except urllib.error.URLError:
-        print(f'[URLError] Failed to call {url2call}\nNetwork connection issue.')
+    except urllib.error.URLError as f:
+        print(f'[URLError] Exception: {f}\nFailed to call {url2call}\nNetwork connection issue.')
         if checkInternetAccess():
             print('[INFO] Internet access is OK.')
-            return 'URLERROR', 0
+            return 'URLERROR', 0, f
         else:
             print('[ERROR] Internet access is KO.')
-            return 'INETERROR', 0
+            return 'INETERROR', 0, f
         pass
-    except Exception as e:
-        print(f'[ERROR] Failed to open {url2call}.\nOther exception.', e)
-        return 'OTHERERROR', 0
+    except Exception as g:
+        print(f'[ERROR] Exception: {g}\nFailed to open {url2call}.\nOther exception.')
+        return 'OTHERERROR', 0, g
         pass
 
 def post_message_to_slack(slackLogChannel, slackMessage, slackEmoji, enableSlack):
@@ -844,8 +835,7 @@ while True:
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
         print('Calling ' + urlList[currentItem]['url'])
-        checkHTTPStatus(urlList[currentItem]['url'], urlList[currentItem]['credentials'], [200,301,302], [400,401,404,405,500], [307,503])
-        payload, urlList[currentItem]['rt_history'][cycleCntr] = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
+        payload, urlList[currentItem]['rt_history'][cycleCntr], http_status = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
         if (payload != 'HTTPERROR') and (payload != 'URLERROR') and (payload != 'INETERROR') and (payload != 'OTHERERROR'):
             # UP
             urlList[currentItem]['payload'] = payload
