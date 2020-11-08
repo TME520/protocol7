@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.11'
+version = '0.47.12'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -923,6 +923,20 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
+                elif http_status in urlList[currentItem]['failure']:
+                    whiteCounter += 1
+                    urlList[currentItem]['payload'] = 'FAILURE'
+                    print('[ERROR] FAILURE (white light) for ' + str(urlList[currentItem]['url']))
+                    if urlList[currentItem]['latest_deployment'] == 'None':
+                        currentHeader = 'application_up'
+                        currentStatus = f'<font color="red"><b>/!\ Last test failed</b> ({http_status})</font>'
+                        currentColor = 'green'
+                        dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
+                    else:
+                        currentHeader = 'application_up'
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                        currentColor = 'green'
+                        dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
                 else:
                     currentHeader = 'application_grey'
                     currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
@@ -989,6 +1003,39 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
+                elif http_status in urlList[currentItem]['failure']:
+                    if urlList[currentItem]['latest_deployment'] != 'None':
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                    else:
+                        currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
+                    print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
+                    orangeAlert = 1
+                    currentHeader = 'application_incident'
+                    if urlList[currentItem]['orange_since'] == '-':
+                        urlList[currentItem]['orange_since'] = dashboardTStamp
+                    currentColor = 'orange'
+                    print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
+                    if urlList[currentItem]['orange_sent'] == 0:
+                        if enableSlack == '1':
+                            slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                        if enableMSTeams == '1':
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning')
+                        robotText = 'Attention please, we currently have an issue.'
+                        urlList[currentItem]['orange_sent'] = 1
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
+                    robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
                 else:
                     currentHeader = 'application_grey'
                     currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
@@ -1057,6 +1104,41 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
+                elif http_status in urlList[currentItem]['failure']:
+                    if urlList[currentItem]['latest_deployment'] != 'None':
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                    else:
+                        currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
+                    print('[RED] Failures count of 6+ triggered a red alert')
+                    redAlert = 1
+                    currentHeader = 'application_down'
+                    if urlList[currentItem]['orange_since'] != '-':
+                        urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
+                    elif urlList[currentItem]['red_since'] == '-':
+                        urlList[currentItem]['red_since'] = dashboardTStamp
+                    currentColor = 'red'
+                    print(f'- {urlList[currentItem]["appname"]} is DOWN')
+                    if urlList[currentItem]['red_sent'] == 0:
+                        if enableSlack == '1':
+                            slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
+                        if enableMSTeams == '1':
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF4747', 'Red alert')
+                        robotText = 'Attention please, we currently have an issue.'
+                        urlList[currentItem]['red_sent'] = 1
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
+                    robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
                 else:
                     currentHeader = 'application_grey'
                     currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
