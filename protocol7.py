@@ -121,6 +121,16 @@ dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
 
+def checkHTTPStatus(url2call, creds, successList, failureList, maintenanceList):
+    try:
+        r = requests.head(url2call)
+        print(f'HTTP status code for {url2call}: {r.status_code}')
+        return r.status_code
+    except requests.ConnectionError:
+        print(f'[ERROR] Failed to open {url2call}.\nOther exception.', e)
+        return 'OTHERERROR', 0
+        pass
+
 def postMessageToMSTeams(msteamsMessage, colorTheme, cardTitle):
     if enableMSTeams == '1':
         try:
@@ -834,6 +844,7 @@ while True:
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
         print('Calling ' + urlList[currentItem]['url'])
+        checkHTTPStatus(urlList[currentItem]['url'], urlList[currentItem]['credentials'], [200,301,302], [400,401,404,405,500], [307,503])
         payload, urlList[currentItem]['rt_history'][cycleCntr] = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
         if (payload != 'HTTPERROR') and (payload != 'URLERROR') and (payload != 'INETERROR') and (payload != 'OTHERERROR'):
             # UP
