@@ -260,7 +260,7 @@ def testNTAPI(apiURL, countryName, countryToken, clubId, dateMin, dateMax):
             'Content-Type': 'application/json',
             'Cache-Control': 'no-cache',
             'Authorization': 'Bearer ' + countryToken,
-            'User-Agent':'P/7 dashboard version ' + version + ' (run=' + str(epoch) + ')'
+            'User-Agent':'protocol/7 Open Source monitoring ' + version + ' (run=' + str(epoch) + ')'
         }
 
         data = '{"brandCode":"ff","countryCode":"' + countryName + '","ClubId":"' + str(clubId) + '","TimeFrom":"' + str(dateMin) + '","TimeTo":"' + str(dateMax) + '"}'
@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.10'
+version = '0.47.11'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
