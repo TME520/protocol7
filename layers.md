@@ -84,9 +84,10 @@
 | retries | Integer | D | 3 |
 | timeout | Integer | D | 10 |
 | success | Array | D | [200,301] |
-| failure | Array | D | [401,404,500,503] |
+| failure | Array | D | [401,404,500] |
+| maintenance | Array | D | [307,503] |
 | flappingCntr | Integer | C | 4 |
 | flappingStatus | Integer | C | 2 |
 | previousStatus | String | C | U |
 | currentStatus | String | C | D |
-| maintenance | String | D | 20201015 |
+| ack | String | D | 20201015 |
