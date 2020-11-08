@@ -497,9 +497,8 @@ def callURL(url2call, creds):
             return 'INETERROR', 0, f
         pass
     except Exception as g:
-        print(f'[ERROR] Exception: {g}\nFailed to open {url2call}.\nOther exception.')
-        print(f'HTTP: {response.getcode()}')
-        return 'OTHERERROR', 0, g
+        print(f'[OTHERERROR] Exception: {g}\nFailed to open {url2call}.\nOther exception.')
+        return 'OTHERERROR', 0, 0
         pass
 
 def post_message_to_slack(slackLogChannel, slackMessage, slackEmoji, enableSlack):
