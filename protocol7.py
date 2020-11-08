@@ -842,7 +842,7 @@ while True:
             print('Failure')
         elif http_status in urlList[currentItem]['maintenance']:
             print('Maintenance')
-        else
+        else:
             print('Failed for unknown reason')
         if (payload != 'HTTPERROR') and (payload != 'URLERROR') and (payload != 'INETERROR') and (payload != 'OTHERERROR'):
             # UP
