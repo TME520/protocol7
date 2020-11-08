@@ -482,23 +482,21 @@ def callURL(url2call, creds):
         print(f'load_elapsed: {load_elapsed}, http_status: {http_status}')
         return payload, load_elapsed, http_status
     except urllib.error.HTTPError as e:
-        print(f'[HTTPError] Exception: {e}\nFailed to call {url2call}\nProvider might be down or credentials might have expired.')
-        print(f'HTTP: {response.getcode()}')
-        return 'HTTPERROR', 0, e
+        print(f'[HTTPError] Exception: {e} ({e.code})\nFailed to call {url2call}\nProvider might be down or credentials might have expired.')
+        return 'HTTPERROR', 0, e.code
         pass
     except urllib.error.URLError as f:
-        print(f'[URLError] Exception: {f}\nFailed to call {url2call}\nNetwork connection issue.')
-        print(f'HTTP: {response.getcode()}')
+        print(f'[URLError] Exception: {f} ({f.code})\nFailed to call {url2call}\nNetwork connection issue.')
         if checkInternetAccess():
             print('[INFO] Internet access is OK.')
-            return 'URLERROR', 0, f
+            return 'URLERROR', 0, f.code
         else:
             print('[ERROR] Internet access is KO.')
-            return 'INETERROR', 0, f
+            return 'INETERROR', 0, f.code
         pass
     except Exception as g:
-        print(f'[OTHERERROR] Exception: {g}\nFailed to open {url2call}.\nOther exception.')
-        return 'OTHERERROR', 0, 0
+        print(f'[OTHERERROR] Exception: {g} ({g.code})\nFailed to open {url2call}.\nOther exception.')
+        return 'OTHERERROR', 0, g.code
         pass
 
 def post_message_to_slack(slackLogChannel, slackMessage, slackEmoji, enableSlack):
