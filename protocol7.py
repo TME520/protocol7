@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.9'
+version = '0.47.10'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -1065,6 +1065,15 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
+        else:
+            print('Unmanaged - Other HTTP error code')
+            currentHeader = 'application_grey'
+            currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
+            currentColor = 'grey'
+            whiteCounter += 1
+            urlList[currentItem]['payload'] = 'OTHERERROR'
+            print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
+            dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
         print(f'- Response time history over the last 6 cycles: {urlList[currentItem]["rt_history"]}')
         currentFailtage = (failuresCntr / 6) * 100
         currentFailtage = round(currentFailtage,1)
