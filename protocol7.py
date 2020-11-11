@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.13'
+version = '0.47.14'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -947,16 +947,16 @@ while True:
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
             elif (failuresCntr >= 2) and (failuresCntr <= 5):
                 if http_status == 666:
-                    if urlList[currentItem]['latest_deployment'] != 'None':
-                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
-                    else:
-                        currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
                     currentHeader = 'application_incident'
                     if urlList[currentItem]['orange_since'] == '-':
                         urlList[currentItem]['orange_since'] = dashboardTStamp
                     currentColor = 'orange'
+                    if urlList[currentItem]['latest_deployment'] != 'None':
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                    else:
+                        currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
                     print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
                     if urlList[currentItem]['orange_sent'] == 0:
                         if enableSlack == '1':
@@ -1105,10 +1105,6 @@ while True:
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
                 elif http_status in urlList[currentItem]['failure']:
-                    if urlList[currentItem]['latest_deployment'] != 'None':
-                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
-                    else:
-                        currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
                     currentHeader = 'application_down'
@@ -1117,6 +1113,10 @@ while True:
                     elif urlList[currentItem]['red_since'] == '-':
                         urlList[currentItem]['red_since'] = dashboardTStamp
                     currentColor = 'red'
+                    if urlList[currentItem]['latest_deployment'] != 'None':
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                    else:
+                        currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
                     print(f'- {urlList[currentItem]["appname"]} is DOWN')
                     if urlList[currentItem]['red_sent'] == 0:
                         if enableSlack == '1':
