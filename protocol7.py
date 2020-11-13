@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.14'
+version = '0.47.15'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -1301,6 +1301,7 @@ while True:
     postToSumo(f'[DEBUG] bottomLightColor={bottomLightColor} topLightColor={topLightColor} redAlert={redAlert} orangeAlert={orangeAlert} redAlertSent={redAlertSent} orangeAlertSent={orangeAlertSent}', enableSumo)
     postToSumo(f'[DEBUG] bottomRemoteLightColor={bottomRemoteLightColor} topRemoteLightColor={topRemoteLightColor}', enableSumo)
     postToSumo(f'[DEBUG] enableLocalBStick={enableLocalBStick} enableRemoteBStick={enableRemoteBStick} enableCozmo={enableCozmo} enableSlack={enableSlack} enableSumo={enableSumo} enableDashboard={enableDashboard}', enableSumo)
+    print(f'[DEBUG] dashboardBaseURL: {dashboardBaseURL}, s3BucketName: {s3BucketName}, advancedDashboardFilename: {advancedDashboardFilename}, Dashboard URL in Teams: {dashboardBaseURL}/{advancedDashboardFilename}, Dashboard URL in Slack: http://{s3BucketName}/{advancedDashboardFilename}')
 
     print(Fore.RED + '[Protocol/7] ' + Fore.BLUE + '\nEnd of cycle. Next cycle in ' + str(cycleDuration) + ' seconds.')
     print('Now waiting for next cycle to begin', end='', flush=True)
