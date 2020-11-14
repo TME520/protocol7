@@ -620,7 +620,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.15'
+version = '0.47.16'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -741,7 +741,7 @@ print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
 post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
-postMessageToMSTeams(f'Config data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', '47A7FF', 'Protocol/7 server started')
+postMessageToMSTeams(f'Config data:\r\n- DYNAMODBURL: {databaseURL}\r\n- P7INSTANCEID: {instanceIdentifier}\r\n- Dashboard: {dashboardBaseURL}/{advancedDashboardFilename}', '47A7FF', 'Protocol/7 server started')
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
@@ -1206,7 +1206,7 @@ while True:
             try:
                 uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
                 print('...done.')
-                print(f'You can check the dashboard here: http://{dashboardBaseURL}/{advancedDashboardFilename}')
+                print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
