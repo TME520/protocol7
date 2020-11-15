@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.20'
+version = '0.47.21'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -972,7 +972,6 @@ while True:
                 if http_status == 666:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
-                    orangeCounter += 1
                     currentHeader = 'application_incident'
                     if urlList[currentItem]['orange_since'] == '-':
                         urlList[currentItem]['orange_since'] = dashboardTStamp
@@ -983,6 +982,7 @@ while True:
                         currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
                     print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
                     if urlList[currentItem]['orange_sent'] == 0:
+                        orangeCounter += 1
                         if enableSlack == '1':
                             slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
                             slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
@@ -1035,7 +1035,6 @@ while True:
                 elif http_status in urlList[currentItem]['failure']:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
-                    orangeCounter += 1
                     currentHeader = 'application_incident'
                     if urlList[currentItem]['orange_since'] == '-':
                         urlList[currentItem]['orange_since'] = dashboardTStamp
@@ -1046,6 +1045,7 @@ while True:
                         currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
                     print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
                     if urlList[currentItem]['orange_sent'] == 0:
+                        orangeCounter += 1
                         if enableSlack == '1':
                             slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
                             slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
@@ -1083,7 +1083,6 @@ while True:
                 if http_status == 666:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
-                    redCounter += 1
                     currentHeader = 'application_down'
                     if urlList[currentItem]['orange_since'] != '-':
                         urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
@@ -1096,6 +1095,7 @@ while True:
                         currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
                     print(f'- {urlList[currentItem]["appname"]} is DOWN')
                     if urlList[currentItem]['red_sent'] == 0:
+                        redCounter += 1
                         if enableSlack == '1':
                             slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
                             slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
@@ -1148,7 +1148,6 @@ while True:
                 elif http_status in urlList[currentItem]['failure']:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
-                    redCounter += 1
                     currentHeader = 'application_down'
                     if urlList[currentItem]['orange_since'] != '-':
                         urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
@@ -1161,6 +1160,7 @@ while True:
                         currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
                     print(f'- {urlList[currentItem]["appname"]} is DOWN')
                     if urlList[currentItem]['red_sent'] == 0:
+                        redCounter += 1
                         if enableSlack == '1':
                             slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
                             slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
