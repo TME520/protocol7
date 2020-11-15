@@ -121,13 +121,27 @@ dashboardTempFolder = './dashboard/'
 if not os.path.exists(dashboardTempFolder):
     os.makedirs(dashboardTempFolder)
 
-def postMessageToMSTeams(msteamsMessage, colorTheme, cardTitle):
+def postMessageToMSTeams(msteamsMessage, colorTheme, cardTitle, cardType, optS1Text='', optS2Text=''):
     if enableMSTeams == '1':
         try:
             myTeamsMessage = pymsteams.connectorcard(msTeamsWebhook)
             myTeamsMessage.color(colorTheme)
             myTeamsMessage.title(cardTitle)
-            myTeamsMessage.text(msteamsMessage)
+            if cardType == 'normal':
+                myTeamsMessage.text(msteamsMessage)
+            elif cardType == 'grouped':
+                myTeamsMessage.text(msteamsMessage)
+                # Red alerts
+                Section1 = pymsteams.cardsection()
+                Section1.title("<b><font color='red'>Red alerts</font></b>")
+                Section1.text(optS1Text)
+                # Orange alerts
+                Section2 = pymsteams.cardsection()
+                Section2.title("<b><font color='orange'>Orange warnings</font></b>")
+                Section2.text(optS2Text)
+                # Add both Sections to the main card object
+                myTeamsMessage.addSection(Section1)
+                myTeamsMessage.addSection(Section2)
             myTeamsMessage.send()
             print(f'[postMessageToMSTeams] {msteamsMessage}')
         except Exception as e:
@@ -620,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.16'
+version = '0.47.17'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -741,7 +755,7 @@ print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
 post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
-postMessageToMSTeams(f'Config data:\r\n- DYNAMODBURL: {databaseURL}\r\n- P7INSTANCEID: {instanceIdentifier}\r\n- Dashboard: {dashboardBaseURL}/{advancedDashboardFilename}', '47A7FF', 'Protocol/7 server started')
+postMessageToMSTeams(f'Config data:\r\n- DYNAMODBURL: {databaseURL}\r\n- P7INSTANCEID: {instanceIdentifier}\r\n- Dashboard: {dashboardBaseURL}/{advancedDashboardFilename}', '47A7FF', 'Protocol/7 server started', 'normal')
 while True:
     # 6 cycles (from 0 to 5)
     # Temporary setting bottom light to blue
@@ -783,6 +797,9 @@ while True:
     pinkCounter = 0
     redAlert = 0
     orangeAlert = 0
+    groupAlerts = 0
+    groupedAlertS1Text = '<ul>'
+    groupedAlertS2Text = '<ul>'
     slackStatusText = ''
     slackAlertText = '--- *' + currentDT.strftime("%H:%M") + '* ---\n'
     publishNewGKAdvice = 'no'
@@ -837,6 +854,11 @@ while True:
     # Apps
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
+        if (groupAlerts == 0) and (orangeCounter + redCounter >= 4):
+            groupAlerts = 1
+            print('Now grouping alerts')
+        else:
+            groupAlerts = 0
         print('Calling ' + urlList[currentItem]['url'])
         payload, urlList[currentItem]['rt_history'][cycleCntr], http_status = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
         if http_status in urlList[currentItem]['success']:
@@ -949,6 +971,7 @@ while True:
                 if http_status == 666:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
+                    orangeCounter += 1
                     currentHeader = 'application_incident'
                     if urlList[currentItem]['orange_since'] == '-':
                         urlList[currentItem]['orange_since'] = dashboardTStamp
@@ -974,7 +997,12 @@ while True:
                                     slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
                                 else:
                                     slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning')
+                            if groupAlerts == 0:
+                                # Alerts grouping NOT active
+                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
+                            elif groupAlerts == 1:
+                                # Alerts grouping active
+                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})</li>'
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
@@ -1006,6 +1034,7 @@ while True:
                 elif http_status in urlList[currentItem]['failure']:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
+                    orangeCounter += 1
                     currentHeader = 'application_incident'
                     if urlList[currentItem]['orange_since'] == '-':
                         urlList[currentItem]['orange_since'] = dashboardTStamp
@@ -1031,7 +1060,12 @@ while True:
                                     slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
                                 else:
                                     slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning')
+                            if groupAlerts == 0:
+                                # Alerts grouping NOT active
+                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
+                            elif groupAlerts == 1:
+                                # Alerts grouping active
+                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})</li>'
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
@@ -1048,6 +1082,7 @@ while True:
                 if http_status == 666:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
+                    redCounter += 1
                     currentHeader = 'application_down'
                     if urlList[currentItem]['orange_since'] != '-':
                         urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
@@ -1075,7 +1110,12 @@ while True:
                                     slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
                                 else:
                                     slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF4747', 'Red alert')
+                            if groupAlerts == 0:
+                                # Alerts grouping NOT active
+                                postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is DOWN ({slackAlertText})', 'FF4747', 'Red alert', 'normal')
+                            elif groupAlerts == 1:
+                                # Alerts grouping active
+                                groupedAlertS1Text += f'<li>{urlList[currentItem]["appname"]} is DOWN ({slackAlertText})</li>'
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
@@ -1107,6 +1147,7 @@ while True:
                 elif http_status in urlList[currentItem]['failure']:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
+                    redCounter += 1
                     currentHeader = 'application_down'
                     if urlList[currentItem]['orange_since'] != '-':
                         urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
@@ -1134,7 +1175,12 @@ while True:
                                     slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
                                 else:
                                     slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF4747', 'Red alert')
+                            if groupAlerts == 0:
+                                # Alerts grouping NOT active
+                                postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is DOWN ({slackAlertText})', 'FF4747', 'Red alert', 'normal')
+                            elif groupAlerts == 1:
+                                # Alerts grouping active
+                                groupedAlertS1Text += f'<li>{urlList[currentItem]["appname"]} is DOWN ({slackAlertText})</li>'
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
@@ -1171,6 +1217,8 @@ while True:
     dashboardText = dashboardText + '</div></div>'
     dashboardText = dashboardText + '</body></html>'
     dashboardText2 = dashboardText2 + '</body></html>'
+    groupedAlertS1Text += '</ul>'
+    groupedAlertS2Text += '</ul>'
     # robot.say_text('Now that I am done retrieving data, I will analyze it.').wait_for_completed()
     # time.sleep(shortWait)
 
@@ -1242,7 +1290,10 @@ while True:
     # post_message_to_slack(slackLogChannel, slackStatusText, ':coc1:', enableSlack)
     if publishNewGKAdvice == 'yes':
         post_message_to_slack(slackGKAdviceChannel, slackStatusText, ':coc1:', enableSlack)
-        postMessageToMSTeams(slackStatusText, 'C0C0C0', '')
+        postMessageToMSTeams(slackStatusText, 'C0C0C0', '', 'normal')
+
+    if groupAlerts == 1:
+        postMessageToMSTeams('Protocol/7 grouped several notifications together in order to preserve your mental health', 'FF4747', 'Alert storm', 'grouped', groupedAlertS1Text, groupedAlertS2Text)
 
     if firstRun == 0:
         firstRun = 1
