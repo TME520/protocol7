@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.19'
+version = '0.47.20'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -854,7 +854,7 @@ while True:
     # Apps
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
-        if (groupAlerts == 0) and ((orangeCounter + redCounter) >= 4):
+        if (orangeCounter + redCounter) >= 4:
             groupAlerts = 1
             print(f'Now grouping alerts {(orangeCounter + redCounter)}')
         else:
