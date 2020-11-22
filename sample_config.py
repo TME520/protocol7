@@ -7,3 +7,6 @@ urlList = {
     'ROLAND':{'appname':'Roland Radio', 'customer':'Amstrad CPC music', 'url':'https://rolandradio.net', 'credentials':emptyCreds, 'payload':'EMPTY', 'failure_history':[0,0,0,0,0,0], 'rt_history':[0,0,0,0,0,0], 'orange_since':'-', 'red_since':'-', 'orange_sent':0, 'red_sent':0, 'release_def_ids':[0], 'latest_deployment':'None', 'protocol':'HTTPS', 'retries':3, 'timeout':10, 'success':[200,301,302], 'failure':[400,401,404,500], 'maintenance':[307,503], 'flappingCntr':0, 'flappingStatus':0, 'previousStatus':'None', 'currentStatus':'None', 'ack':'19700101', 'runbook':''},
     'TRELLO':{'appname':'Trello', 'customer':'Kanban', 'url':'https://trello.com', 'credentials':emptyCreds, 'payload':'EMPTY', 'failure_history':[0,0,0,0,0,0], 'rt_history':[0,0,0,0,0,0], 'orange_since':'-', 'red_since':'-', 'orange_sent':0, 'red_sent':0, 'release_def_ids':[0], 'latest_deployment':'None', 'protocol':'HTTPS', 'retries':3, 'timeout':10, 'success':[200,301,302], 'failure':[400,401,404,500], 'maintenance':[307,503], 'flappingCntr':0, 'flappingStatus':0, 'previousStatus':'None', 'currentStatus':'None', 'ack':'19700101', 'runbook':''}
 }
+
+ntAPICountriesList = {}
+

@@ -91,3 +91,4 @@
 | previousStatus | String | C | U |
 | currentStatus | String | C | D |
 | ack | String | D | 20201015 |
+| runbook | String | D | http://runbooks.com |
