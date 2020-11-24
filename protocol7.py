@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.28'
+version = '0.47.29'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -1086,9 +1086,7 @@ while True:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
                     currentHeader = 'application_down'
-                    if urlList[currentItem]['orange_since'] != '-':
-                        urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
-                    elif urlList[currentItem]['red_since'] == '-':
+                    if urlList[currentItem]['red_since'] == '-':
                         urlList[currentItem]['red_since'] = dashboardTStamp
                     currentColor = 'red'
                     if urlList[currentItem]['latest_deployment'] != 'None':
@@ -1151,9 +1149,7 @@ while True:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
                     currentHeader = 'application_down'
-                    if urlList[currentItem]['orange_since'] != '-':
-                        urlList[currentItem]['red_since'] = urlList[currentItem]['orange_since']
-                    elif urlList[currentItem]['red_since'] == '-':
+                    if urlList[currentItem]['red_since'] == '-':
                         urlList[currentItem]['red_since'] = dashboardTStamp
                     currentColor = 'red'
                     if urlList[currentItem]['latest_deployment'] != 'None':
