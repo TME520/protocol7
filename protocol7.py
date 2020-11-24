@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.25'
+version = '0.47.26'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -1216,7 +1216,10 @@ while True:
         newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
-        writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>Meh</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
+        # Write advanced analytics file
+        if enableDashboard == '1':
+            writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>Meh</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
+
 
     dashboardText = dashboardText + '</div></div>'
     dashboardText = dashboardText + '</body></html>'
@@ -1256,7 +1259,8 @@ while True:
         if azureDashboard == '1':
             print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
             try:
-                uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
+                # uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
+                uploadFileToAzure(container_name, dashboardTempFolder, '*.html')
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
@@ -1267,7 +1271,8 @@ while True:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
-                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
+                # uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
+                uploadFileToS3(f'{dashboardTempFolder}', s3BucketName, '*.html')
                 print('...done.')
                 print(f'You can check the dashboard here: {s3BucketName}/{advancedDashboardFilename}')
             except Exception as e:
