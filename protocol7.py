@@ -1218,7 +1218,7 @@ while True:
         postToSumo(newLogLine, enableSumo)
         # Write advanced analytics file
         if enableDashboard == '1':
-            writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>Meh</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
+            writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>{currentItem}</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
 
 
     dashboardText = dashboardText + '</div></div>'
