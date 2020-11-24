@@ -1216,7 +1216,7 @@ while True:
         newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
-        writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>{urlList[currentItem]["appname"]}</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
+        writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>Meh</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
 
     dashboardText = dashboardText + '</div></div>'
     dashboardText = dashboardText + '</body></html>'
