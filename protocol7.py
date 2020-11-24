@@ -1218,7 +1218,12 @@ while True:
         postToSumo(newLogLine, enableSumo)
         # Write advanced analytics file
         if enableDashboard == '1':
-            writeDataToFile(f'{dashboardTempFolder}{currentItem}.html',f'<HTML><HEAD><TITLE>{currentItem}</TITLE></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
+            try:
+                writeDataToFile(f'{dashboardTempFolder}{currentItem}.html','<HTML><HEAD><TITLE>' + str(currentItem) + '</TITLE><BODY><H1>' + urlList[currentItem]["appname"] + '}</H1><H2>' + urlList[currentItem]["customer"] + '</H2><P><UL><LI><b>URL</b>: ' + urlList[currentItem]["url"] + '</LI><LI><b>Payload</b>: ' + urlList[currentItem]["payload"] + '</LI><LI><b>Failure history (0=OK, 1=KO)</b>: ' + urlList[currentItem]["failure_history"] + '</LI><LI><b>Orange since</b>: ' + urlList[currentItem]["orange_since"] + '</LI><LI><b>Red since</b>: ' + urlList[currentItem]["red_since"] + '</LI></UL></P><P>' + newLogLine + '</P></BODY></HEAD></HTML>','Advanced analytics file updated successfully','Advanced analytics file refresh FAILED', 'overwrite')
+            except Exception as e:
+                print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
+                traceback.print_exc()
+                pass
 
 
     dashboardText = dashboardText + '</div></div>'
