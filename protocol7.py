@@ -1224,6 +1224,10 @@ while True:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
                 pass
+            if azureDashboard == '1':
+                uploadFileToAzure(container_name, dashboardTempFolder + str(currentItem) + '.html', str(currentItem) + '.html')
+            if amazonDashboard == '1':
+                uploadFileToS3(f'{dashboardTempFolder}', s3BucketName, '*.html')
 
 
     dashboardText = dashboardText + '</div></div>'
@@ -1264,8 +1268,7 @@ while True:
         if azureDashboard == '1':
             print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
             try:
-                # uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
-                uploadFileToAzure(container_name, dashboardTempFolder + '*.html', '')
+                uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
@@ -1276,8 +1279,7 @@ while True:
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
-                # uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
-                uploadFileToS3(f'{dashboardTempFolder}', s3BucketName, '*.html')
+                uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
                 print('...done.')
                 print(f'You can check the dashboard here: {s3BucketName}/{advancedDashboardFilename}')
             except Exception as e:
