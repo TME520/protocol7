@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.26'
+version = '0.47.27'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -1247,7 +1247,7 @@ while True:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
                 pass
-        else:
+        if amazonDashboard == '1':
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}\n', 'Log updated', 'Failed to update log', 'append')
@@ -1265,14 +1265,14 @@ while True:
             print(f'Updating {dashboardFile2} on {azure_stor_acc_name}...')
             try:
                 # uploadFileToAzure(container_name, dashboardUploadFilePath2, dashboardFile2)
-                uploadFileToAzure(container_name, dashboardTempFolder, '*.html')
+                uploadFileToAzure(container_name, dashboardTempFolder + '*.html', '')
                 print('...done.')
                 print(f'You can check the dashboard here: {dashboardBaseURL}/{advancedDashboardFilename}')
             except Exception as e:
                 print('[ERROR] Failed to update the dashboard on remote storage.\n', e)
                 traceback.print_exc()
                 pass
-        else:
+        if amazonDashboard == '1':
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
                 writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
