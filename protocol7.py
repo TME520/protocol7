@@ -864,7 +864,7 @@ while True:
             print(f'No need to group alerts yet {(orangeCounter + redCounter)}')
         print('Calling ' + urlList[currentItem]['url'])
         payload, urlList[currentItem]['rt_history'][cycleCntr], http_status = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
-        if http_status in urlList[currentItem]['success']:
+        if http_status in urlList[currentItem]['http_success']:
             # UP
             print('Success')
             urlList[currentItem]['payload'] = payload
@@ -883,7 +883,7 @@ while True:
             print(f'- {urlList[currentItem]["appname"]} is UP')
             urlList[currentItem]['failure_history'][cycleCntr] = 0
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
-        elif http_status in urlList[currentItem]['maintenance']:
+        elif http_status in urlList[currentItem]['http_maintenance']:
             print('Maintenance')
             urlList[currentItem]['payload'] = payload
             if urlList[currentItem]['latest_deployment'] == 'None':
@@ -903,7 +903,7 @@ while True:
             print(f'- {urlList[currentItem]["appname"]} status is {currentStatus}')
             urlList[currentItem]['failure_history'][cycleCntr] = 0
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
-        elif (http_status in urlList[currentItem]['failure']) or (http_status in specialHTTPErrors):
+        elif (http_status in urlList[currentItem]['http_failure']) or (http_status in specialHTTPErrors):
             print('Failure')
             urlList[currentItem]['failure_history'][cycleCntr] = 1
             print(f'- Test history over the last 6 cycles: {urlList[currentItem]["failure_history"]}')
@@ -948,7 +948,7 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
-                elif http_status in urlList[currentItem]['failure']:
+                elif http_status in urlList[currentItem]['http_failure']:
                     whiteCounter += 1
                     urlList[currentItem]['payload'] = 'FAILURE'
                     print('[ERROR] FAILURE (white light) for ' + str(urlList[currentItem]['url']))
@@ -1034,7 +1034,7 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
-                elif http_status in urlList[currentItem]['failure']:
+                elif http_status in urlList[currentItem]['http_failure']:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
                     currentHeader = 'application_incident'
@@ -1145,7 +1145,7 @@ while True:
                     urlList[currentItem]['payload'] = 'OTHERERROR'
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
-                elif http_status in urlList[currentItem]['failure']:
+                elif http_status in urlList[currentItem]['http_failure']:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
                     currentHeader = 'application_down'
