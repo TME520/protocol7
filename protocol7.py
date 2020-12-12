@@ -853,6 +853,8 @@ while True:
     urlList = lookForDeployments(environment, projectName, urlList, deploymentsTStamp)
 
     # Apps
+    # We check HTTP status first
+    # In case of HTTP success we check payload content
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
         print(f'currentItem: {currentItem}')
@@ -865,9 +867,19 @@ while True:
         print('Calling ' + urlList[currentItem]['url'])
         payload, urlList[currentItem]['rt_history'][cycleCntr], http_status = callURL(str(urlList[currentItem]['url']), urlList[currentItem]['credentials'])
         if http_status in urlList[currentItem]['http_success']:
-            # UP
-            print('Success')
+            # UP (HTTP)
+            print('HTTP success')
             urlList[currentItem]['payload'] = payload
+            # Checking payload (success, maintenance, failure)
+            print('Checking payload')
+            if urlList[currentItem]['payload_success'] in payload.lower():
+                print('Payload success')
+            elif urlList[currentItem]['payload_maintenance'] in payload.lower():
+                print('Payload maintenance')
+            elif urlList[currentItem]['payload_failure'] in payload.lower():
+                print('Payload failure')
+            else:
+                print('Payload uncertain')
             if urlList[currentItem]['latest_deployment'] == 'None':
                 currentHeader = 'application_up'
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
@@ -884,7 +896,8 @@ while True:
             urlList[currentItem]['failure_history'][cycleCntr] = 0
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
         elif http_status in urlList[currentItem]['http_maintenance']:
-            print('Maintenance')
+            # MAINTENANCE
+            print('HTTP maintenance')
             urlList[currentItem]['payload'] = payload
             if urlList[currentItem]['latest_deployment'] == 'None':
                 currentHeader = 'application_maintenance'
@@ -904,7 +917,8 @@ while True:
             urlList[currentItem]['failure_history'][cycleCntr] = 0
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
         elif (http_status in urlList[currentItem]['http_failure']) or (http_status in specialHTTPErrors):
-            print('Failure')
+            # FAILURE - 1st
+            print('HTTP failure')
             urlList[currentItem]['failure_history'][cycleCntr] = 1
             print(f'- Test history over the last 6 cycles: {urlList[currentItem]["failure_history"]}')
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
@@ -971,6 +985,7 @@ while True:
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
             elif (failuresCntr >= 2) and (failuresCntr <= 5):
+                # FAILURE - Orange
                 if http_status == 666:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
@@ -1082,6 +1097,7 @@ while True:
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
             elif failuresCntr >= 6:
+                # FAILURE - Red
                 if http_status == 666:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
@@ -1193,6 +1209,7 @@ while True:
                     print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
         else:
+            # UNMANAGED
             print('Unmanaged - Other HTTP error code')
             currentHeader = 'application_grey'
             currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
