@@ -869,6 +869,7 @@ while True:
         if http_status in urlList[currentItem]['http_success']:
             # UP (HTTP)
             print('HTTP success')
+            print(f'payload: {payload}')
             urlList[currentItem]['payload'] = payload
             # Checking payload (success, maintenance, failure)
             print('Checking payload')
