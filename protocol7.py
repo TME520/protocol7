@@ -873,11 +873,11 @@ while True:
             urlList[currentItem]['payload'] = payload
             # Checking payload (success, maintenance, failure)
             print('Checking payload')
-            if urlList[currentItem]['payload_success'] in payload.lower():
+            if urlList[currentItem]['payload_success'] in str(payload).lower():
                 print('Payload success')
-            elif urlList[currentItem]['payload_maintenance'] in payload.lower():
+            elif urlList[currentItem]['payload_maintenance'] in str(payload).lower():
                 print('Payload maintenance')
-            elif urlList[currentItem]['payload_failure'] in payload.lower():
+            elif urlList[currentItem]['payload_failure'] in str(payload).lower():
                 print('Payload failure')
             else:
                 print('Payload uncertain')
