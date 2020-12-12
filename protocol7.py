@@ -872,7 +872,6 @@ while True:
             # print(f'payload: {payload}')
             urlList[currentItem]['payload'] = payload
             # Checking payload (success, maintenance, failure)
-            print('Checking payload')
             if urlList[currentItem]['payload_success'].lower() in str(payload).lower():
                 print('Payload success')
             elif urlList[currentItem]['payload_maintenance'].lower() in str(payload).lower():
