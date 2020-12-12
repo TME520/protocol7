@@ -83,9 +83,12 @@
 | protocol | String | D | HTTP |
 | retries | Integer | D | 3 |
 | timeout | Integer | D | 10 |
-| success | Array | D | [200,301] |
-| failure | Array | D | [401,404,500] |
-| maintenance | Array | D | [307,503] |
+| http_success | Array | D | [200,301] |
+| http_failure | Array | D | [401,404,500] |
+| http_maintenance | Array | D | [307,503] |
+| payload_success | String | D | "Welcome" |
+| payload_failure | String | D | "Runtime error" |
+| payload_maintenance | String | D | "currently under maintenance" |
 | flappingCntr | Integer | C | 4 |
 | flappingStatus | Integer | C | 2 |
 | previousStatus | String | C | U |
