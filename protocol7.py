@@ -694,6 +694,14 @@ azureDashboard = os.getenv('AZDASHENABLED')
 amazonDashboard = os.getenv('AWSDASHENABLED')
 s3BucketName = os.getenv('S3BUCKETNAME')
 specialHTTPErrors = [666,777,999]
+green = '73D87D'
+yellow = 'E6DE05'
+orange = 'FF904F'
+red = 'FF4747'
+pink = 'FF4FEA'
+grey = 'C0C0C0'
+purple = '7532A8'
+light_blue = '47A7FF'
 
 # Reset head and lift position
 # robot.set_head_angle(cozmo.robot.MIN_HEAD_ANGLE).wait_for_completed()
@@ -826,13 +834,14 @@ while True:
     dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + dashboardTitle + ' (' + ISOTStamp + ')' + '</title>'
     dashboardText2 = dashboardText2 + '<script>window.setInterval("refresh()", 20000); function refresh() { window.location.reload() }</script>'
     dashboardText2 = dashboardText2 + '<style>* { box-sizing: border-box; } .columns { float: left; width: 20%; padding: 8px; } body { background-color: #2F2E30; }'
-    dashboardText2 = dashboardText2 + '.application_up { border-top: 20px solid #73D87D; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    dashboardText2 = dashboardText2 + '.application_down { border-top: 20px solid #FF4747; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    dashboardText2 = dashboardText2 + '.application_incident { border-top: 20px solid #FF904F; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    dashboardText2 = dashboardText2 + '.application_deployment { border-top: 20px solid #47A7FF; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    dashboardText2 = dashboardText2 + '.application_grey { border-top: 20px solid #C0C0C0; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    dashboardText2 = dashboardText2 + '.application_pink { border-top: 20px solid #FF4FEA; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
-    dashboardText2 = dashboardText2 + '.application_maintenance { border-top: 20px solid #E6DE05; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_up { border-top: 20px solid #' + green + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_down { border-top: 20px solid #' + red + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_incident { border-top: 20px solid #' + orange + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_deployment { border-top: 20px solid #' + light_blue + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_grey { border-top: 20px solid #' + grey + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_pink { border-top: 20px solid #' + pink + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_maintenance { border-top: 20px solid #' + yellow + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
+    dashboardText2 = dashboardText2 + '.application_mismatch { border-top: 20px solid #' + purple + '; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
     dashboardText2 = dashboardText2 + '.app_name { font-size: 40px; font-weight: bold; } .customer_name { font-size: 30px; } p { margin: 20px; } @media only screen and (max-width: 600px) { .columns { width: 100%; }}'
     dashboardText2 = dashboardText2 + '</style></head><body>'
     currentFailtage = 0
@@ -868,35 +877,31 @@ while True:
         if http_status in urlList[currentItem]['http_success']:
             # UP (HTTP)
             print('HTTP success')
-            # print(f'payload: {payload}')
             urlList[currentItem]['payload'] = payload
             # Checking payload (success, maintenance, failure)
             if urlList[currentItem]['payload_success'].lower() in str(payload).lower():
-                # HTTP + payload success = green
                 print('Payload success')
+                currentStatus = f'Healthy ({http_status})'
+                currentColor = 'green'
+                urlList[currentItem]['orange_since'] = '-'
+                urlList[currentItem]['red_since'] = '-'
+                urlList[currentItem]['orange_sent'] = 0
+                urlList[currentItem]['red_sent'] = 0
+                print(f'- {urlList[currentItem]["appname"]} is UP')
+                urlList[currentItem]['failure_history'][cycleCntr] = 0
+                failuresCntr = urlList[currentItem]["failure_history"].count(1)
+                if urlList[currentItem]['latest_deployment'] == 'None':
+                    currentHeader = 'application_up'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
+                else:
+                    currentHeader = 'application_deployment'
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="deployment">UP</div></div></div>'
             elif urlList[currentItem]['payload_maintenance'].lower() in str(payload).lower():
-                # HTTP OK + payload maintenance = yellow
                 print('Payload maintenance')
             elif urlList[currentItem]['payload_failure'].lower() in str(payload).lower():
-                # HTTP OK + payload KO = 
                 print('Payload failure')
             else:
                 print('Payload uncertain')
-            if urlList[currentItem]['latest_deployment'] == 'None':
-                currentHeader = 'application_up'
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
-            else:
-                currentHeader = 'application_deployment'
-                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="deployment">UP</div></div></div>'
-            currentStatus = f'Healthy ({http_status})'
-            currentColor = 'green'
-            urlList[currentItem]['orange_since'] = '-'
-            urlList[currentItem]['red_since'] = '-'
-            urlList[currentItem]['orange_sent'] = 0
-            urlList[currentItem]['red_sent'] = 0
-            print(f'- {urlList[currentItem]["appname"]} is UP')
-            urlList[currentItem]['failure_history'][cycleCntr] = 0
-            failuresCntr = urlList[currentItem]["failure_history"].count(1)
         elif http_status in urlList[currentItem]['http_maintenance']:
             # MAINTENANCE (HTTP)
             print('HTTP maintenance')
