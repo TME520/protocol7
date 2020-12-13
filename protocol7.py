@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.30'
+version = '0.47.31'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -858,7 +858,7 @@ while True:
     print(Fore.RED + '[Protocol/7] ' + Fore.GREEN + '\nI will now query the applications in order to see if everything is alright.')
     for currentItem in urlList:
         print(f'currentItem: {currentItem}')
-        if (orangeCounter + redCounter) >= 4:
+        if (orangeCounter + redCounter) >= 3:
             groupAlerts = 1
             print(f'Now grouping alerts {(orangeCounter + redCounter)}')
         else:
@@ -926,7 +926,31 @@ while True:
             print(f'- Test history over the last 6 cycles: {urlList[currentItem]["failure_history"]}')
             failuresCntr = urlList[currentItem]["failure_history"].count(1)
             print(f'- Number of failures: {failuresCntr}')
-            if failuresCntr == 1:
+            if http_status == 777:
+                currentHeader = 'application_grey'
+                currentStatus = f'<font color="orange"><b>Internet cnx failed during test</b> ({http_status})</font>'
+                currentColor = 'grey'
+                whiteCounter += 1
+                urlList[currentItem]['payload'] = 'INETERROR'
+                print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
+            elif http_status == 401:
+                currentHeader = 'application_pink'
+                currentStatus = f'<font color="orange"><b>Credentials were refused</b> ({http_status})</font>'
+                currentColor = 'pink'
+                pinkCounter += 1
+                urlList[currentItem]['payload'] = 'HTTPERROR'
+                print('[ERROR] HTTPERROR (pink light) for ' + str(urlList[currentItem]['url']))
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
+            elif http_status == 999:
+                currentHeader = 'application_grey'
+                currentStatus = f'<font color="orange"><b>Other error</b> ({http_status})</font>'
+                currentColor = 'grey'
+                whiteCounter += 1
+                urlList[currentItem]['payload'] = 'OTHERERROR'
+                print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
+            elif failuresCntr == 1:
                 if http_status == 666:
                     whiteCounter += 1
                     urlList[currentItem]['payload'] = 'URLERROR'
@@ -941,30 +965,6 @@ while True:
                         currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
                         currentColor = 'green'
                         dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
-                elif http_status == 777:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Internet cnx failed during test</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'INETERROR'
-                    print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
-                elif http_status == 401:
-                    currentHeader = 'application_pink'
-                    currentStatus = f'<font color="orange"><b>Credentials were refused</b> ({http_status})</font>'
-                    currentColor = 'pink'
-                    pinkCounter += 1
-                    urlList[currentItem]['payload'] = 'HTTPERROR'
-                    print('[ERROR] HTTPERROR (pink light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
-                elif http_status == 999:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Other error</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'OTHERERROR'
-                    print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
                 elif http_status in urlList[currentItem]['http_failure']:
                     whiteCounter += 1
                     urlList[currentItem]['payload'] = 'FAILURE'
@@ -1028,30 +1028,6 @@ while True:
                         urlList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
                     robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
-                elif http_status == 777:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Internet cnx failed during test</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'INETERROR'
-                    print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
-                elif http_status == 401:
-                    currentHeader = 'application_pink'
-                    currentStatus = f'<font color="orange"><b>Credentials were refused</b> ({http_status})</font>'
-                    currentColor = 'pink'
-                    pinkCounter += 1
-                    urlList[currentItem]['payload'] = 'HTTPERROR'
-                    print('[ERROR] HTTPERROR (pink light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
-                elif http_status == 999:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Other error</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'OTHERERROR'
-                    print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
                 elif http_status in urlList[currentItem]['http_failure']:
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
@@ -1140,30 +1116,6 @@ while True:
                         urlList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
                     robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
-                elif http_status == 777:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Internet cnx failed during test</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'INETERROR'
-                    print('[ERROR] INETERROR for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">INET CNX ISSUE</div></div></div>'
-                elif http_status == 401:
-                    currentHeader = 'application_pink'
-                    currentStatus = f'<font color="orange"><b>Credentials were refused</b> ({http_status})</font>'
-                    currentColor = 'pink'
-                    pinkCounter += 1
-                    urlList[currentItem]['payload'] = 'HTTPERROR'
-                    print('[ERROR] HTTPERROR (pink light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="pink">CREDS ISSUE</div></div></div>'
-                elif http_status == 999:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Other error</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'OTHERERROR'
-                    print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
                 elif http_status in urlList[currentItem]['http_failure']:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
