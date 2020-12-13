@@ -201,5 +201,5 @@ N/A
 | failure 401 (HTTPERROR) | - | 6+ | pink | CREDS ISSUE |
 | failure 999 (OTHERERROR) | - | 6+ | grey | OTHER ISSUE |
 | failure (OTHERERROR) | - | 6+ | grey | UNMANAGED ISSUE |
-| failure User Defined | None | 6+ | green | DOWN |
-| failure User Defined | Yes | 6+ | green | DOWN - Check for deployment |
+| failure User Defined | None | 6+ | red | DOWN |
+| failure User Defined | Yes | 6+ | red | DOWN - Check for deployment |
