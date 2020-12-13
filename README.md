@@ -171,3 +171,35 @@ N/A
 N/A
 
 ## Usage
+
+### Dashboard statuses
+
+| HTTP status | Deployment | Failures counter | Color | Status |
+| --- | --- | --- | --- | --- |
+| success | None | - | green | UP |
+| success | Yes | - | light blue | UP |
+| maintenance | None | - | yellow | MAINTENANCE |
+| maintenance | Yes | - | light blue | UP |
+| failure | - | 1 | green | UP - Check for deployment |
+| failure 666 (URLERROR) | - | 1 | green | UP - Last test failed |
+| failure 777 (INETERROR) | - | 1 | grey | INET CNX ISSUE |
+| failure 401 (HTTPERROR) | - | 1 | pink | CREDS ISSUE |
+| failure 999 (OTHERERROR) | - | 1 | grey | OTHER ISSUE |
+| failure (OTHERERROR) | - | 1 | grey | UNMANAGED ISSUE |
+| failure User Defined | None | 1 | green | UP - Last test failed |
+| failure User Defined | Yes | 1 | green | UP - Check for deployment |
+| failure 666 | - | 2-5 | orange | UNKNOWN |
+| failure 777 (INETERROR) | - | 2-5 | grey | INET CNX ISSUE |
+| failure 401 (HTTPERROR) | - | 2-5 | pink | CREDS ISSUE |
+| failure 999 (OTHERERROR) | - | 2-5 | grey | OTHER ISSUE |
+| failure (OTHERERROR) | - | 2-5 | grey | UNMANAGED ISSUE |
+| failure User Defined | None | 2-5 | orange | INCIDENT |
+| failure User Defined | Yes | 2-5 | orange | INCIDENT - Check for deployment |
+| failure | None | 6+ | red | DOWN |
+| failure | Yes | 6+ | red | DOWN - Check for deployment |
+| failure 777 (INETERROR) | - | 6+ | grey | INET CNX ISSUE |
+| failure 401 (HTTPERROR) | - | 6+ | pink | CREDS ISSUE |
+| failure 999 (OTHERERROR) | - | 6+ | grey | OTHER ISSUE |
+| failure (OTHERERROR) | - | 6+ | grey | UNMANAGED ISSUE |
+| failure User Defined | None | 6+ | green | DOWN |
+| failure User Defined | Yes | 6+ | green | DOWN - Check for deployment |
