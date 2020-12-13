@@ -1000,12 +1000,12 @@ while True:
                         currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
                     else:
                         currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
-                    print(f'- {urlList[currentItem]["appname"]} is UNKNOWN')
+                    print(f'- {urlList[currentItem]["appname"]} is INCIDENT')
                     if urlList[currentItem]['orange_sent'] == 0:
                         orangeCounter += 1
                         if enableSlack == '1':
                             slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is UNKNOWN\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is INCIDENT\n'
                             if enableDashboard == '1':
                                 if azureDashboard == '1':
                                     slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
@@ -1020,10 +1020,10 @@ while True:
                                     slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
                             if groupAlerts == 0:
                                 # Alerts grouping NOT active
-                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
+                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is INCIDENT ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
                             elif groupAlerts == 1:
                                 # Alerts grouping active
-                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is UNKNOWN ({slackAlertText})</li>'
+                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is INCIDENT ({slackAlertText})</li>'
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
