@@ -634,7 +634,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.31'
+version = '0.47.32'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -824,7 +824,6 @@ while True:
     dashboardText = dashboardText + '.flex-container div.maintenance{background: #e6de05;}'
     dashboardText = dashboardText + '</style></head><body><center><h1>Refreshed: ' + dashboardTStamp + '</h1></center>'
     dashboardText2 = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>' + dashboardTitle + ' (' + ISOTStamp + ')' + '</title>'
-    dashboardText2 = dashboardText2 + '<meta name="viewport" content="width=device-width, initial-scale=1">'
     dashboardText2 = dashboardText2 + '<script>window.setInterval("refresh()", 20000); function refresh() { window.location.reload() }</script>'
     dashboardText2 = dashboardText2 + '<style>* { box-sizing: border-box; } .columns { float: left; width: 20%; padding: 8px; } body { background-color: #2F2E30; }'
     dashboardText2 = dashboardText2 + '.application_up { border-top: 20px solid #73D87D; border-bottom: 20px solid #D8D8D8; border-radius: 10px; margin: 0; padding: 0; background-color: #D8D8D8; font-size: 20px; }'
@@ -950,8 +949,9 @@ while True:
                 urlList[currentItem]['payload'] = 'OTHERERROR'
                 print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
                 dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">OTHER ISSUE</div></div></div>'
-            elif failuresCntr == 1:
-                if http_status == 666:
+            elif http_status == 666:
+                # URLERROR
+                if failuresCntr == 1:
                     whiteCounter += 1
                     urlList[currentItem]['payload'] = 'URLERROR'
                     print('[ERROR] URLERROR (white light) for ' + str(urlList[currentItem]['url']))
@@ -965,7 +965,87 @@ while True:
                         currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
                         currentColor = 'green'
                         dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
-                elif http_status in urlList[currentItem]['http_failure']:
+                elif (failuresCntr >= 2) and (failuresCntr <= 5):
+                    print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
+                    orangeAlert = 1
+                    currentHeader = 'application_incident'
+                    if urlList[currentItem]['orange_since'] == '-':
+                        urlList[currentItem]['orange_since'] = dashboardTStamp
+                    currentColor = 'orange'
+                    if urlList[currentItem]['latest_deployment'] != 'None':
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                    else:
+                        currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
+                    print(f'- {urlList[currentItem]["appname"]} is FAILING')
+                    if urlList[currentItem]['orange_sent'] == 0:
+                        orangeCounter += 1
+                        if enableSlack == '1':
+                            slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is FAILING\n'
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
+                        if enableMSTeams == '1':
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            if groupAlerts == 0:
+                                # Alerts grouping NOT active
+                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is FAILING ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
+                            elif groupAlerts == 1:
+                                # Alerts grouping active
+                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is FAILING ({slackAlertText})</li>'
+                        robotText = 'Attention please, we currently have an issue.'
+                        urlList[currentItem]['orange_sent'] = 1
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
+                    robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
+                elif failuresCntr >= 6:
+                    print('[RED] Failures count of 6+ triggered a red alert')
+                    redAlert = 1
+                    currentHeader = 'application_down'
+                    if urlList[currentItem]['red_since'] == '-':
+                        urlList[currentItem]['red_since'] = dashboardTStamp
+                    currentColor = 'red'
+                    if urlList[currentItem]['latest_deployment'] != 'None':
+                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
+                    else:
+                        currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
+                    print(f'- {urlList[currentItem]["appname"]} is DOWN')
+                    if urlList[currentItem]['red_sent'] == 0:
+                        redCounter += 1
+                        if enableSlack == '1':
+                            slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
+                        if enableMSTeams == '1':
+                            if enableDashboard == '1':
+                                if azureDashboard == '1':
+                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
+                                else:
+                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
+                            if groupAlerts == 0:
+                                # Alerts grouping NOT active
+                                postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is DOWN ({slackAlertText})', 'FF4747', 'Red alert', 'normal')
+                            elif groupAlerts == 1:
+                                # Alerts grouping active
+                                groupedAlertS1Text += f'<li>{urlList[currentItem]["appname"]} is DOWN ({slackAlertText})</li>'
+                        robotText = 'Attention please, we currently have an issue.'
+                        urlList[currentItem]['red_sent'] = 1
+                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
+                    robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
+            elif http_status in urlList[currentItem]['http_failure']:
+                # USER DEFINED
+                if failuresCntr == 1:
                     whiteCounter += 1
                     urlList[currentItem]['payload'] = 'FAILURE'
                     print('[ERROR] FAILURE (white light) for ' + str(urlList[currentItem]['url']))
@@ -979,17 +1059,7 @@ while True:
                         currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
                         currentColor = 'green'
                         dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="up">UP</div></div></div>'
-                else:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'OTHERERROR'
-                    print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
-            elif (failuresCntr >= 2) and (failuresCntr <= 5):
-                # FAILURE - Orange
-                if http_status == 666:
+                elif (failuresCntr >= 2) and (failuresCntr <= 5):
                     print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
                     orangeAlert = 1
                     currentHeader = 'application_incident'
@@ -1000,12 +1070,12 @@ while True:
                         currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
                     else:
                         currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
-                    print(f'- {urlList[currentItem]["appname"]} is INCIDENT')
+                    print(f'- {urlList[currentItem]["appname"]} is FAILING')
                     if urlList[currentItem]['orange_sent'] == 0:
                         orangeCounter += 1
                         if enableSlack == '1':
                             slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is INCIDENT\n'
+                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is FAILING\n'
                             if enableDashboard == '1':
                                 if azureDashboard == '1':
                                     slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
@@ -1020,64 +1090,15 @@ while True:
                                     slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
                             if groupAlerts == 0:
                                 # Alerts grouping NOT active
-                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is INCIDENT ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
+                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is FAILING ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
                             elif groupAlerts == 1:
                                 # Alerts grouping active
-                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is INCIDENT ({slackAlertText})</li>'
+                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is FAILING ({slackAlertText})</li>'
                         robotText = 'Attention please, we currently have an issue.'
                         urlList[currentItem]['orange_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
                     robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
-                elif http_status in urlList[currentItem]['http_failure']:
-                    print('[ORANGE] Failures count between 2 and 5 triggered an orange alert')
-                    orangeAlert = 1
-                    currentHeader = 'application_incident'
-                    if urlList[currentItem]['orange_since'] == '-':
-                        urlList[currentItem]['orange_since'] = dashboardTStamp
-                    currentColor = 'orange'
-                    if urlList[currentItem]['latest_deployment'] != 'None':
-                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
-                    else:
-                        currentStatus = f'Since {urlList[currentItem]["orange_since"]} ({http_status})'
-                    print(f'- {urlList[currentItem]["appname"]} is INCIDENT')
-                    if urlList[currentItem]['orange_sent'] == 0:
-                        orangeCounter += 1
-                        if enableSlack == '1':
-                            slackAlertText = '[ORANGE] Failures count between 2 and 5 triggered an orange alert\n'
-                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is INCIDENT\n'
-                            if enableDashboard == '1':
-                                if azureDashboard == '1':
-                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
-                                else:
-                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocorange1:', enableSlack)
-                        if enableMSTeams == '1':
-                            if enableDashboard == '1':
-                                if azureDashboard == '1':
-                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
-                                else:
-                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            if groupAlerts == 0:
-                                # Alerts grouping NOT active
-                                postMessageToMSTeams(f'[ORANGE] Failures count between 2 and 5 triggered an orange alert: {urlList[currentItem]["appname"]} is INCIDENT ({slackAlertText})', 'FF904F', 'Orange warning', 'normal')
-                            elif groupAlerts == 1:
-                                # Alerts grouping active
-                                groupedAlertS2Text += f'<li>{urlList[currentItem]["appname"]} is INCIDENT ({slackAlertText})</li>'
-                        robotText = 'Attention please, we currently have an issue.'
-                        urlList[currentItem]['orange_sent'] = 1
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="incident">INCIDENT</div></div></div>'
-                    robotText = robotText + f'{urlList[currentItem]["appname"]} is experiencing difficulties.'
-                else:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'OTHERERROR'
-                    print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
-            elif failuresCntr >= 6:
-                # FAILURE - Red
-                if http_status == 666:
+                elif failuresCntr >= 6:
                     print('[RED] Failures count of 6+ triggered a red alert')
                     redAlert = 1
                     currentHeader = 'application_down'
@@ -1116,55 +1137,17 @@ while True:
                         urlList[currentItem]['red_sent'] = 1
                     dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
                     robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
-                elif http_status in urlList[currentItem]['http_failure']:
-                    print('[RED] Failures count of 6+ triggered a red alert')
-                    redAlert = 1
-                    currentHeader = 'application_down'
-                    if urlList[currentItem]['red_since'] == '-':
-                        urlList[currentItem]['red_since'] = dashboardTStamp
-                    currentColor = 'red'
-                    if urlList[currentItem]['latest_deployment'] != 'None':
-                        currentStatus = f'<font color="red"><b>/?\ Check for deployment</b> ({http_status})</font>'
-                    else:
-                        currentStatus = f'Since {urlList[currentItem]["red_since"]} ({http_status})'
-                    print(f'- {urlList[currentItem]["appname"]} is DOWN')
-                    if urlList[currentItem]['red_sent'] == 0:
-                        redCounter += 1
-                        if enableSlack == '1':
-                            slackAlertText = '[RED] Failures count of 6+ triggered a red alert\n'
-                            slackAlertText = slackAlertText + f'{urlList[currentItem]["appname"]} is DOWN\n'
-                            if enableDashboard == '1':
-                                if azureDashboard == '1':
-                                    slackAlertText = slackAlertText + dashboardBaseURL + '/' + advancedDashboardFilename
-                                else:
-                                    slackAlertText = slackAlertText + 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            post_message_to_slack(slackGKAdviceChannel, slackAlertText, ':cocred1:', enableSlack)
-                        if enableMSTeams == '1':
-                            if enableDashboard == '1':
-                                if azureDashboard == '1':
-                                    slackAlertText = dashboardBaseURL + '/' + advancedDashboardFilename
-                                else:
-                                    slackAlertText = 'http://' + s3BucketName + '/' + advancedDashboardFilename
-                            if groupAlerts == 0:
-                                # Alerts grouping NOT active
-                                postMessageToMSTeams(f'[RED] Failures count of 6+ triggered a red alert: {urlList[currentItem]["appname"]} is DOWN ({slackAlertText})', 'FF4747', 'Red alert', 'normal')
-                            elif groupAlerts == 1:
-                                # Alerts grouping active
-                                groupedAlertS1Text += f'<li>{urlList[currentItem]["appname"]} is DOWN ({slackAlertText})</li>'
-                        robotText = 'Attention please, we currently have an issue.'
-                        urlList[currentItem]['red_sent'] = 1
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="down">DOWN</div></div></div>'
-                    robotText = robotText + f'{urlList[currentItem]["appname"]} is DOWN.'
-                else:
-                    currentHeader = 'application_grey'
-                    currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
-                    currentColor = 'grey'
-                    whiteCounter += 1
-                    urlList[currentItem]['payload'] = 'OTHERERROR'
-                    print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
-                    dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
+            else:
+                # UNMANAGED FAILURE
+                currentHeader = 'application_grey'
+                currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
+                currentColor = 'grey'
+                whiteCounter += 1
+                urlList[currentItem]['payload'] = 'OTHERERROR'
+                print('[ERROR] OTHERERROR (white light) for ' + str(urlList[currentItem]['url']))
+                dashboardText = dashboardText + '<div class="flex-container"><div class="meh"><b>' + str(urlList[currentItem]['appname']) + '</b><div class="grey">UNMANAGED ISSUE</div></div></div>'
         else:
-            # UNMANAGED
+            # UNMANAGED UNKNOWN
             print('Unmanaged - Other HTTP error code')
             currentHeader = 'application_grey'
             currentStatus = f'<font color="orange"><b>Other error (unmanaged)</b> ({http_status})</font>'
