@@ -188,7 +188,6 @@ N/A
 | failure (OTHERERROR) | - | 1 | grey | UNMANAGED ISSUE |
 | failure User Defined | None | 1 | green | UP - Last test failed |
 | failure User Defined | Yes | 1 | green | UP - Check for deployment |
-
 | failure 666 (URLERROR) | None | 2-5 | orange | INCIDENT |
 | failure 666 (URLERROR) | Yes | 2-5 | orange | INCIDENT - Check for deployment |
 | failure 777 (INETERROR) | - | 2-5 | grey | INET CNX ISSUE |
@@ -197,7 +196,6 @@ N/A
 | failure (OTHERERROR) | - | 2-5 | grey | UNMANAGED ISSUE |
 | failure User Defined | None | 2-5 | orange | INCIDENT |
 | failure User Defined | Yes | 2-5 | orange | INCIDENT - Check for deployment |
-
 | failure 666 (URLERROR) | None | 6+ | red | DOWN |
 | failure 666 (URLERROR) | Yes | 6+ | red | DOWN - Check for deployment |
 | failure 777 (INETERROR) | - | 6+ | grey | INET CNX ISSUE |
