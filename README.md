@@ -170,6 +170,100 @@ N/A
 
 N/A
 
+## Configuration
+
+In this section, I will explain every configuration file field.
+
+### startProtocol7.sh
+
+During installation, you created the file *startProtocol7.sh* as follows:
+
+`cp -pv ./startTemplate.sh.template ./startProtocol7.sh`
+
+This Bash script exports environment variables that will be used by Protocol/7. Refer to the Code field in order to know if single quotes are required or not. If you want to leave a field empty, simply use empty single quotes. If the field requires a number, just use a default value like 0 (OFF).
+
+| Field | Code | Purpose | Example |
+| --- | --- | --- | --- |
+| NAME | SED001 | Name of the Protocol/7 instance | 'Skynet' |
+| CLIENT | SED002 | Name of the client this instance is used for | 'World Company' |
+| ENV | SED003 | Environment being monitored | 'PROD' | 
+| PROJECT | SED004 | Project being monitored | 'Pink Papadum' |
+| SLACKTOKEN | SED005 | Token used to access Slack | 'AAABBBCCCDDDEEEFFF' |
+| AZSTORACCNAME | SED006 | Azure Storage Account name. Used to store the HTML files of the dashboards. | 'Mithrandir' |
+| AZSTORACCKEY | SED007 | Access key for the Azure Storage Account mentioned above | 'AAABBBCCCDDDEEEFFF' |
+| AZCNXSTRING | SED037 | Connection string for the ASA mentioned above | 'DefaultEndpointsProtocol=https;AccountName=Mithrandir;AccountKey=AAABBBCCCEEE==;EndpointSuffix=core.windows.net'
+| NTAPIUSER | SED008 | Unused; I will remove it once I'm sure all associated code has been disabled | N/A |
+| NTAPIPASS | SED009 | Unused; I will remove it once I'm sure all associated code has been disabled | N/A |
+| AZDEVOPSPAT | SED010 | Personal Access Token for Azure DevOps | 'AAABBBCCCDDDEEEFFF' |
+| SUMOENDPOINT | SED011 | HTTPS endpoint used to ship logs to Sumologic | 'https://foobar.meh' |
+| AWS_ACCESS_KEY_ID | SED033 | Access key for AWS CLI | 'AAABBBCCCDDDEEEFFF' |
+| AWS_SECRET_ACCESS_KEY | SED034 | Password associated with your AWS access key | 'AAABBBCCCDDDEEEFFF' |
+| AWS_DEFAULT_REGION | SED035 | AWS region to use by default | 'ap-southeast-2' |
+| MSTEAMSWEBHOOK | SED039 | Webhook used to interact with MS Teams | 'https://foobar.meh' |
+| DYNAMODBURL | SED012 | DynamoDB is used mainly for information exchange between remote components of Protocol/7. A weird choice, I know. | 'http://localhost:8001' |
+| CB1DATAFOLDER | SED013 | CB1 means "Chat Bot 1", the old name for Persona/7 | './cb1data/' |
+| DASHBOARDFILENAME | SED014 | Name of the HTML file for the simple dashboard | 'onedash-apps-monitoring-foo-bar-prod.html' | 
+| ADVDASHBOARDFILENAME | SED015 | Name of the HTML file for the advanced dashboard | 'onedash-apps-monitoring-advanced-foo-bar-prod.html' |
+| DASHBOARDSBASEURL | SED016 | URL giving access to the dashboards. No need for a trailing slash. | 'https://foobar.meh' |
+| AZDEVOPSURL | SED017 | URL giving access to Azure DevOps | 'https://dev.azure.com/Legion' |
+| LOGSFOLDER | SED018 | This folder will contain the logs produced by Protocol/7 | './log/' |
+| LOGFILENAME | SED019 | The name of the log file | 'p7-foo-bar-prod.log' |
+| CONFIGFILE | SED020 | The config file contains the URLs monitored by Protocol/7 | 'foo_bar_prod_config' |
+| NTSEARCHURL | SED021 | Unused; I will remove it once I'm sure all associated code has been disabled | N/A |
+| NTLOGINURL | SED022 | Unused; I will remove it once I'm sure all associated code has been disabled | N/A |
+| S3BUCKETNAME | SED030 | Name of the AWS S3 bucket used to store the HTML files of the dashboards | 'Mithrandir' |
+| ENABLELOCALBSTICK | SED023 | Drive the Blinkstick locally (0=NO 1=YES) | 0 |
+| ENABLEREMOTEBSTICK | SED036 | Drive the Blikstick remotely (0=NO 1=YES). This implies that an instance of *p7devices* is running on a remote server. | 0 |
+| ENABLESLACK | SED024 | Publish messages to Slack (0=NO 1=YES) | 0 |
+| ENABLESUMO | SED025 | Send logs to Sumologic (0=NO 1=YES) | 0 |
+| ENABLEDASH | SED026 | Make the dashboards available or not (0=NO 1=YES) | 0 |
+| AZDASHENABLED | SED031 | Host the dashboards HTML files on an Azure Account Storage (0=NO 1=YES) | 0 |
+| AWSDASHENABLED | SED032 | Host the dashboards HTML files on a  AWS S3 bucket (0=NO 1=YES) | 0 |
+| ENABLEMSTEAMS | SED038 | Publish messages to MS Teams (0=NO 1=YES). The target channel is defined by the webhook used. | 0 |
+
+### sample_config.py
+
+This file contains the URLs that will be monitored by Protocol/7. It's not included in *startProtocol7.sh* because it's in fact a Python source file.
+
+| Field | Purpose | Example |
+| --- | --- | --- |
+| emptyCreds | Do not change that value, these are dummy creds used by Protocol/7 internally | { 'foo' : 'bar' } |
+| urlList | The URLs that will be monitored by Protocol/7. Fields detailed under this table. | N/A | 
+| ntAPICountriesList | Unused; I will remove it once I'm sure all associated code has been disabled | {} |
+
+#### Details of the urlList fields
+
+| Field | Purpose | Example |
+| --- | --- | --- |
+| appname | Nickname for the URL | 'Google' |
+| customer | What the URL is used for | 'Google search' |
+| url | The URL itself | 'https://www.google.com' |
+| credentials | Credentials used to access the URL | emptyCreds |
+| payload | Data to be POSTed to the URL | 'EMPTY' |
+| failure_history | Internal Protocol/7 data (0 means success, 1 means failure). Do not change. | [0,0,0,0,0,0] |
+| rt_history | Response time history. Internal Protocol/7 data, do not change. | [0,0,0,0,0,0] |
+| orange_since | Internal Protocol/7 data, do not change | '-' |
+| red_since | Internal Protocol/7 data, do not change | '-' |
+| orange_sent | Internal Protocol/7 data, do not change. | 0 |
+| red_sent | Internal Protocol/7 data, do not change | 0 |
+| release_def_ids | Definition IDs related to that URL/Service in Azure DevOps. Used to track deployments. | [0] |
+| latest_deployment | Latest deployment for related IDs in Azure DevOps | 'None' |
+| protocol | Protocol used to access the URL (HTTP,HTTPS) | 'HTTPS' |
+| retries | Number of attempts at reaching the URL | 3 |
+| timeout | Time out in seconds for an attempt at reaching the URL | 10 |
+| http_success | HTTP return codes considered as success | [200,301,302] |
+| http_failure | HTTP return codes considered as failures | [400,401,404,500] |
+| http_maintenance | HTTP return codes indicating the target URL/Service is in maintenance mode | [307,503] |
+| payload_success | Payload retrieved from the URL that is considered as success | 'Feeling Lucky' |
+| payload_maintenance | Payload retrieved from the URL that indicates it's under maintenance | 'maintenance' |
+| payload_failure | Payload retrieved from the URL that is considered as failure | 'error' |
+| flappingCntr | Internal Protocol/7 data, do not change | 0 |
+| flappingStatus | Internal Protocol/7 data, do not change | 0 |
+| previousStatus | Internal Protocol/7 data, do not change | 'None' |
+| currentStatus | Internal Protocol/7 data, do not change | 'None' |
+| ack | Internal Protocol/7 data, do not change | '19700101' '
+| runbook | Runbook to follow in order to fix the issue causing downtime | 'https://documentation.com/foobar/fixit.html#PEBKAC' |
+
 ## Usage
 
 ### Dashboard statuses
