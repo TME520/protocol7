@@ -74,18 +74,18 @@ N/A
 2. Install OpenJDK
 
 ```
-$ apt install openjdk-14-jre
+apt install openjdk-14-jre
 ```
 
 3. Install AWS CLI
 
 ```
-$ apt install awscli
+apt install awscli
 ```
 
 4. Configure AWS access (required even for local DynamoDB)
 
-`$ aws configure`
+`aws configure`
 
 ```
 [default]
@@ -97,7 +97,7 @@ region = ap-southeast-2
 5. Check your config
 
 ```
-$ aws configure list
+aws configure list
 ```
 
 6. Start DynamoDB
@@ -106,7 +106,7 @@ $ aws configure list
 
 7. Install Python3
 
-`$ apt install build-essential libssl-dev libffi-dev python3 python3-pip python3-dev python3-venv python3-pil.imagetk`
+`apt install build-essential libssl-dev libffi-dev python3 python3-pip python3-dev python3-venv python3-pil.imagetk`
 
 8. Install Python pip and some modules
 
