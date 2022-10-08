@@ -521,7 +521,6 @@ def post_message_to_slack(slackLogChannel, slackMessage, slackEmoji, enableSlack
             response = client.chat_postMessage(
                 channel=slackLogChannel,
                 text=slackMessage,
-                as_user='false',
                 username='Cozmo Office Mate',
                 icon_emoji=slackEmoji)
             assert response["ok"]
