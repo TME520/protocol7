@@ -208,7 +208,7 @@ This Bash script exports environment variables that will be used by Protocol/7. 
 | AZDEVOPSURL | SED017 | URL giving access to Azure DevOps | 'https://dev.azure.com/Legion' |
 | LOGSFOLDER | SED018 | This folder will contain the logs produced by Protocol/7 | './log/' |
 | LOGFILENAME | SED019 | The name of the log file | 'p7-foo-bar-prod.log' |
-| CONFIGFILE | SED020 | The config file contains the URLs monitored by Protocol/7 | 'foo_bar_prod_config' |
+| CONFIGFILE | SED020 | The config file contains the URLs monitored by Protocol/7 | 'foo_bar_prod_config' - Make sure the file 'foo_bar_prod_config.py' exists |
 | NTSEARCHURL | SED021 | Unused; I will remove it once I'm sure all associated code has been disabled | N/A |
 | NTLOGINURL | SED022 | Unused; I will remove it once I'm sure all associated code has been disabled | N/A |
 | S3BUCKETNAME | SED030 | Name of the AWS S3 bucket used to store the HTML files of the dashboards | 'Mithrandir' |
