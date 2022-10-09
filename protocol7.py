@@ -182,9 +182,9 @@ def uploadFileToS3(file_name, bucket, object_name=None):
         object_name = file_name
 
     # Upload the file
-    s3_client = boto3.client('s3')
+    s3_client = boto3.client('s3', aws_access_key_id=s3AwsAccessKeyId, aws_secret_access_key=s3AwsSecretKey)
     try:
-        response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={'ContentType': "text/html", 'ACL': "public-read"})
+        response = s3_client.upload_file(file_name, bucket, object_name, ExtraArgs={'ContentType': "text/html"})
     except ClientError as e:
         logging.error(e)
         return False
@@ -633,7 +633,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.32'
+version = '0.47.50'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -692,6 +692,8 @@ dashboardBaseURL = os.getenv('DASHBOARDSBASEURL')
 azureDashboard = os.getenv('AZDASHENABLED')
 amazonDashboard = os.getenv('AWSDASHENABLED')
 s3BucketName = os.getenv('S3BUCKETNAME')
+s3AwsAccessKeyId = os.getenv('AWS_ACCESS_KEY_ID')
+s3AwsSecretKey = os.getenv('AWS_SECRET_ACCESS_KEY')
 specialHTTPErrors = [666,777,999]
 green = '73D87D'
 yellow = 'E6DE05'
@@ -1182,7 +1184,7 @@ while True:
             if azureDashboard == '1':
                 uploadFileToAzure(container_name, dashboardTempFolder + str(currentItem) + '.html', str(currentItem) + '.html')
             if amazonDashboard == '1':
-                uploadFileToS3(f'{dashboardTempFolder}', s3BucketName, '*.html')
+                uploadFileToS3(dashboardTempFolder + str(currentItem) + '.html', s3BucketName, str(currentItem) + '.html')
 
 
     dashboardText = dashboardText + '</div></div>'
