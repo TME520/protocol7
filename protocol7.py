@@ -763,7 +763,7 @@ print(Fore.RED + 'Instance ID: ' + instanceIdentifier)
 print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
-post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data are as follows:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
+post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
 postMessageToMSTeams(f'Config data:\r\n- DYNAMODBURL: {databaseURL}\r\n- P7INSTANCEID: {instanceIdentifier}\r\n- Dashboard: {dashboardBaseURL}/{advancedDashboardFilename}', '47A7FF', 'Protocol/7 server started', 'normal')
 while True:
     # 6 cycles (from 0 to 5)
@@ -1170,7 +1170,7 @@ while True:
         currentRespTime = round(currentRespTime,1)
         dashboardText2 = dashboardText2 + '<div class="columns" title="' + urlList[currentItem]["url"] + '" onclick="window.open(\'' + dashboardBaseURL + '/' + str(currentItem) + '.html' + '\', \'_blank\');"><div class="' + currentHeader + '"><p><b class="app_name">' + str(urlList[currentItem]['appname']) + '</b><br/><font class="customer_name">' + urlList[currentItem]["customer"] + '</font></p><p><b>Failtage</b>: ' + str(currentFailtage) + '%<br/><b>Resp. time</b>: ' + str(currentRespTime) + ' seconds<br/><b>Status</b>: ' + currentStatus + '<br/><b>Deployments</b>: ' + urlList[currentItem]["latest_deployment"] + '</p></div></div>'
         print(f'- Resp. time: {currentRespTime} seconds\n')
-        newLogLine = f'[ {ISOTStamp} ] run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
+        newLogLine = f'[ {ISOTStamp} ] instanceIdentifier={instanceIdentifier} run={epoch} cycle={cycleCntr} yyyymmdd={yyyymmdd} hhmm={hhmm} timeblock={timeblock} version={version}' + f' type=\"dashboard\" name=\"{urlList[currentItem]["appname"]}\" customer=\"{urlList[currentItem]["customer"]}\" failtage={currentFailtage} resp_time={currentRespTime} status=\"{currentStatus}\" deployments=\"{urlList[currentItem]["latest_deployment"]}\" color=\"{currentColor}\"\n'
         writeDataToFile(fullLogPath, newLogLine, 'Log updated', 'Failed to update log', 'append')
         postToSumo(newLogLine, enableSumo)
         # Write advanced analytics file
@@ -1211,7 +1211,7 @@ while True:
         if amazonDashboard == '1':
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
-                writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}\n', 'Log updated', 'Failed to update log', 'append')
+                # writeDataToFile(fullLogPath, f'dashboardUploadFilePath: {dashboardUploadFilePath}\n', 'Log updated', 'Failed to update log', 'append')
                 uploadFileToS3(f'{dashboardUploadFilePath}', s3BucketName, 'p7.html')
                 print('...done.')
                 print(f'You can check the dashboard here: http://{s3BucketName}/{dashboardFilename}')
@@ -1235,7 +1235,7 @@ while True:
         if amazonDashboard == '1':
             print(f'Updating {dashboardFile} on S3 bucket...')
             try:
-                writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
+                # writeDataToFile(fullLogPath, f'dashboardUploadFilePath2: {dashboardUploadFilePath2}\n', 'Log updated', 'Failed to update log', 'append')
                 uploadFileToS3(f'{dashboardUploadFilePath2}', s3BucketName, 'p7adv.html')
                 print('...done.')
                 print(f'You can check the dashboard here: {s3BucketName}/{advancedDashboardFilename}')
