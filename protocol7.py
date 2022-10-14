@@ -633,7 +633,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.50'
+version = '0.47.51'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -674,7 +674,7 @@ whiteCounter = 0
 pinkCounter = 0
 topLightColor = 'blue'
 topRemoteLightColor = '"tR":"0","tG":"0","tB":"255"'
-urgencyWords = ['ombudsman','court','tribunal','urgent','emergency','angry','dissatisfied','escalation','attorney','lawyer','threat', 'extreme', 'annoy', 'complain', 'insult', 'upset']
+urgencyWords = ['ombudsman','court','tribunal','urgent','emergency','angry','dissatisfied','escalation','attorney','lawyer','threat','extreme','annoy','complain','insult','upset','techops','devops','sre','incident','accident','production','prod','downtime','down','unhappy','broken','break','breakage']
 emptyCreds = { 'foo' : 'bar' }
 container_name = '$web'
 azure_stor_acc_name = os.getenv('AZSTORACCNAME')
