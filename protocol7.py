@@ -633,7 +633,7 @@ def update_remote_bstick_nano(bgcolor, fgcolor, bottommode, topmode, enableRemot
 #     print('Cozmo program')
 
 # Variables declaration
-version = '0.47.51'
+version = '0.47.52'
 greetingSentences = ['Hi folks !','Hey ! I am back !','Hi ! How you doing ?','Cozmo, ready !']
 databaseURL = os.environ.get('DYNAMODBURL')
 
@@ -763,7 +763,7 @@ print(Fore.RED + 'Instance ID: ' + instanceIdentifier)
 print('')
 print(Fore.GREEN + '')
 # Post config info to Slack
-post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: {instanceIdentifier}', ':coc1:', enableSlack)
+post_message_to_slack(slackGKAdviceChannel, f'Protocol/7 server started\nConfig data:\n- DYNAMODBURL: {databaseURL}\n- P7INSTANCEID: `{instanceIdentifier}`\n- Dashboard: {dashboardBaseURL}', ':coc1:', enableSlack)
 postMessageToMSTeams(f'Config data:\r\n- DYNAMODBURL: {databaseURL}\r\n- P7INSTANCEID: {instanceIdentifier}\r\n- Dashboard: {dashboardBaseURL}/{advancedDashboardFilename}', '47A7FF', 'Protocol/7 server started', 'normal')
 while True:
     # 6 cycles (from 0 to 5)
